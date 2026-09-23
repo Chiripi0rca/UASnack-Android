@@ -1,0 +1,18 @@
+stages:
+  - build
+
+# Este job NO necesita el runner de tu servidor de casa -- compilar Android
+# requiere el SDK de Android, que no vive ahi. Usa cualquier runner con
+# executor Docker disponible en tu instancia de GitLab (ver nota abajo).
+build_apk:
+  stage: build
+  image: mingc/android-build-box:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - chmod +x ./gradlew
+    - ./gradlew assembleDebug
+  artifacts:
+    paths:
+      - app/build/outputs/apk/debug/*.apk
+    expire_in: 4 weeks
