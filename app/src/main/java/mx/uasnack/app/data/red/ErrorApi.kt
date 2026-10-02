@@ -16,8 +16,11 @@ class ErrorApi(
     // Solo en 422: mensajes por campo, por ejemplo {"password": ["..."]}
     val campos: Map<String, List<String>> = emptyMap(),
     // Segundos del header Retry-After (429 y reenvío de código), o null si no vino
-    val reintentarEn: Int? = null
-) : IOException(mensaje) {
+    val reintentarEn: Int? = null,
+    // Error original de OkHttp cuando no hubo respuesta (sin conexión). No se muestra al usuario,
+    // pero queda en el log para saber qué falló de verdad (DNS, tiempo agotado, HTTP bloqueado...)
+    causa: Throwable? = null
+) : IOException(mensaje, causa) {
 
     // Primer mensaje de cada campo, que es lo que se muestra debajo de cada input
     val primerErrorPorCampo: Map<String, String>

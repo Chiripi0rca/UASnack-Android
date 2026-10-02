@@ -26,6 +26,9 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
 
+        // Solo hace algo en debug: pide el permiso para hablar con el backend local (Android 17+)
+        pedirPermisoRedLocal(this)
+
         // El repositorio de sesión lo arma UasnackApp una sola vez para toda la app.
         // Se le pasa a la navegación para que decida si abrir en el login o en Tiendas.
         val sesionRepository = (application as UasnackApp).sesionRepository

@@ -26,7 +26,8 @@ class ErrorInterceptor(
             throw ErrorApi(
                 status = 0,
                 codigo = ErrorApi.SIN_CONEXION,
-                mensaje = ErrorApi.MENSAJE_SIN_CONEXION
+                mensaje = ErrorApi.MENSAJE_SIN_CONEXION,
+                causa = e
             )
         }
 
