@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo en debug. Se suma al manifest de src/main al compilar.
+
+     Desde Android 17 (API 37) una app no puede conectarse a direcciones de la red local
+     (10.0.2.2 del emulador, o la IP de la PC en la wifi) sin este permiso: la conexión no da error,
+     simplemente se queda esperando hasta agotar el tiempo.
+     Lo necesita la app de desarrollo para hablar con el backend local. El APK de release se conecta
+     al servidor por internet y no lo pide. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+</manifest>

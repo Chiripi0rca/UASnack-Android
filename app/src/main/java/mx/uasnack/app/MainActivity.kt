@@ -26,6 +26,9 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
 
+        // Solo hace algo en debug: pide el permiso para hablar con el backend local (Android 17+)
+        pedirPermisoRedLocal(this)
+
         setContent {
             TemaUASnack {
                 // Surface pinta el fondo (surface del Anexo B) y el color de texto por defecto
