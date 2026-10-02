@@ -2,13 +2,21 @@ package mx.uasnack.app.ui.acceso
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import mx.uasnack.app.data.red.aErrorApi
+import mx.uasnack.app.data.repositorio.SesionRepository
 import mx.uasnack.app.domain.modelo.Facultad
+import mx.uasnack.app.uasnackApp
 
 // Estado de la lista de facultades, para mostrar "Cargando…", "No se pudieron cargar" o la lista
 sealed interface EstadoFacultades {
@@ -43,10 +51,14 @@ data class EstadoRegistroUi(
 }
 
 sealed interface EventoRegistro {
-    data class CuentaCreada(val correo: String) : EventoRegistro
+    // reenviarEnSegundos: lo que dijo el servidor que hay que esperar para reenviar el código
+    data class CuentaCreada(val correo: String, val reenviarEnSegundos: Int) : EventoRegistro
 }
 
-class RegistroViewModel(private val estadoGuardado: SavedStateHandle) : ViewModel() {
+class RegistroViewModel(
+    private val estadoGuardado: SavedStateHandle,
+    private val sesionRepository: SesionRepository
+) : ViewModel() {
 
     // Se recuperan del SavedStateHandle los datos que no son sensibles (la contraseña no se guarda)
     private val _estado = MutableStateFlow(
@@ -68,11 +80,13 @@ class RegistroViewModel(private val estadoGuardado: SavedStateHandle) : ViewMode
         cargarFacultades()
     }
 
+    // GET /facultades. Mientras carga el campo dice "Cargando facultades…"; si falla aparece "Reintentar".
     fun cargarFacultades() {
-        // TODO (#160): pedir GET /facultades y pasar a Listas(...) o a Error si falla.
-        // Mientras no exista la capa de red se usa la facultad del seeder del backend.
-        _estado.update {
-            it.copy(facultades = EstadoFacultades.Listas(listOf(Facultad(1, "Facultad de Informática Culiacán"))))
+        _estado.update { it.copy(facultades = EstadoFacultades.Cargando) }
+        viewModelScope.launch {
+            sesionRepository.facultades()
+                .onSuccess { lista -> _estado.update { it.copy(facultades = EstadoFacultades.Listas(lista)) } }
+                .onFailure { _estado.update { it.copy(facultades = EstadoFacultades.Error) } }
         }
     }
 
@@ -121,23 +135,53 @@ class RegistroViewModel(private val estadoGuardado: SavedStateHandle) : ViewMode
         val actual = _estado.value
         if (!actual.botonHabilitado) return
 
-        // TODO (#160 y #161): llamar a POST /auth/registro con nombre, apellido,
-        // correo_institucional, id_facultad, password, telefono y acepto_terminos = true,
-        // con cargando = true mientras responde, y según la respuesta:
-        //  - 201         -> _eventos.send(EventoRegistro.CuentaCreada(correo))
-        //  - 422         -> errores = primer mensaje de cada campo de "campos"
-        //  - otro error  -> errorGeneral = mensaje del servidor
-        // Mientras no exista la capa de red, se pasa directo a Verificación para probar la navegación.
-        _eventos.trySend(EventoRegistro.CuentaCreada(actual.correo.trim().lowercase()))
+        val correo = actual.correo.trim().lowercase()
+        // El botón cambia a "Creando cuenta…" de inmediato y se quitan los errores anteriores
+        _estado.update { it.copy(cargando = true, errores = emptyMap(), errorGeneral = null) }
+
+        viewModelScope.launch {
+            sesionRepository.registro(
+                nombre = actual.nombre.trim(),
+                apellido = actual.apellido.trim(),
+                correo = correo,
+                idFacultad = actual.idFacultad,
+                password = actual.password,
+                telefono = actual.telefono
+            )
+                .onSuccess { reenviarEnSegundos ->
+                    // 201: la cuenta se creó y el servidor ya mandó el código al correo
+                    _estado.update { it.copy(cargando = false) }
+                    _eventos.send(EventoRegistro.CuentaCreada(correo, reenviarEnSegundos))
+                }
+                .onFailure {
+                    val error = it.aErrorApi()
+                    // 422: el primer mensaje de cada campo va debajo de su input (correo ya registrado,
+                    // dominio no institucional...). El general solo se muestra si no hay errores por campo,
+                    // igual que la PWA.
+                    val errores = error.primerErrorPorCampo
+                    _estado.update { estado ->
+                        estado.copy(
+                            cargando = false,
+                            errores = errores,
+                            errorGeneral = if (errores.isEmpty()) error.mensaje else null
+                        )
+                    }
+                }
+        }
     }
 
-    private companion object {
-        const val TELEFONO_DIGITOS = 10
-        const val CLAVE_NOMBRE = "nombre"
-        const val CLAVE_APELLIDO = "apellido"
-        const val CLAVE_CORREO = "correo"
-        const val CLAVE_FACULTAD = "id_facultad"
-        const val CLAVE_TELEFONO = "telefono"
-        const val CLAVE_TERMINOS = "acepta_terminos"
+    companion object {
+        private const val TELEFONO_DIGITOS = 10
+        private const val CLAVE_NOMBRE = "nombre"
+        private const val CLAVE_APELLIDO = "apellido"
+        private const val CLAVE_CORREO = "correo"
+        private const val CLAVE_FACULTAD = "id_facultad"
+        private const val CLAVE_TELEFONO = "telefono"
+        private const val CLAVE_TERMINOS = "acepta_terminos"
+
+        // Cómo se crea el ViewModel: con su SavedStateHandle y el repositorio que arma UasnackApp
+        val Fabrica = viewModelFactory {
+            initializer { RegistroViewModel(createSavedStateHandle(), uasnackApp().sesionRepository) }
+        }
     }
 }

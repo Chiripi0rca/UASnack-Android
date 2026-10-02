@@ -50,16 +50,16 @@ import mx.uasnack.app.ui.tema.TemaUASnack
 // Pantalla 2 · Registro. Conecta el ViewModel con la navegación; lo visual está en RegistroContenido.
 @Composable
 fun RegistroPantalla(
-    alCrearCuenta: (correo: String) -> Unit,
+    alCrearCuenta: (correo: String, reenviarEnSegundos: Int) -> Unit,
     alIrALogin: () -> Unit,
-    viewModel: RegistroViewModel = viewModel()
+    viewModel: RegistroViewModel = viewModel(factory = RegistroViewModel.Fabrica)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.eventos.collect { evento ->
             when (evento) {
-                is EventoRegistro.CuentaCreada -> alCrearCuenta(evento.correo)
+                is EventoRegistro.CuentaCreada -> alCrearCuenta(evento.correo, evento.reenviarEnSegundos)
             }
         }
     }

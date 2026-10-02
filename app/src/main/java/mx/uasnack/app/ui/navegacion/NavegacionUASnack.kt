@@ -53,14 +53,22 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
 
             composable(Rutas.REGISTRO) {
                 RegistroPantalla(
-                    alCrearCuenta = { correo -> navController.navigate(Rutas.verificacion(correo)) },
+                    alCrearCuenta = { correo, reenviarEnSegundos ->
+                        navController.navigate(Rutas.verificacion(correo, reenviarEnSegundos))
+                    },
                     alIrALogin = { navController.popBackStack() }
                 )
             }
 
             composable(
                 route = Rutas.VERIFICACION,
-                arguments = listOf(navArgument(Rutas.ARG_CORREO) { type = NavType.StringType })
+                arguments = listOf(
+                    navArgument(Rutas.ARG_CORREO) { type = NavType.StringType },
+                    navArgument(Rutas.ARG_REENVIAR_EN) {
+                        type = NavType.IntType
+                        defaultValue = 0
+                    }
+                )
             ) {
                 VerificacionPantalla(alVerificar = { navController.entrarAlPrincipal() })
             }
