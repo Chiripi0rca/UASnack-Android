@@ -1,6 +1,8 @@
 package mx.uasnack.app
 
 import android.app.Application
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,3 +44,8 @@ class UasnackApp : Application() {
     // Lo que usarán los ViewModels de acceso, registro y verificación
     val sesionRepository: SesionRepository by lazy { SesionRepository(api, sesionAlmacen) }
 }
+
+// Para las fábricas de los ViewModels (viewModelFactory { initializer { ... } }):
+// Android les pasa el Application en las CreationExtras, y de ahí se sacan los repositorios.
+fun CreationExtras.uasnackApp(): UasnackApp =
+    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as UasnackApp

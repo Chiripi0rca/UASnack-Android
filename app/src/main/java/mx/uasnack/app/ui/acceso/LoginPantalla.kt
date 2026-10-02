@@ -46,7 +46,7 @@ fun LoginPantalla(
     alIniciarSesion: () -> Unit,
     alIrARegistro: () -> Unit,
     alIrAVerificacion: (correo: String) -> Unit,
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel = viewModel(factory = LoginViewModel.Fabrica)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 

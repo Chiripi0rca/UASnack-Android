@@ -2,7 +2,10 @@ package mx.uasnack.app.ui.acceso
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -12,6 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import mx.uasnack.app.data.red.aErrorApi
+import mx.uasnack.app.data.repositorio.SesionRepository
+import mx.uasnack.app.uasnackApp
 import mx.uasnack.app.ui.navegacion.Rutas
 
 const val DIGITOS_CODIGO = 6
@@ -32,7 +38,10 @@ sealed interface EventoVerificacion {
     data object CorreoVerificado : EventoVerificacion
 }
 
-class VerificacionViewModel(private val estadoGuardado: SavedStateHandle) : ViewModel() {
+class VerificacionViewModel(
+    private val estadoGuardado: SavedStateHandle,
+    private val sesionRepository: SesionRepository
+) : ViewModel() {
 
     // El correo llega en la ruta (verificacion/{correo}); Navigation lo deja en el SavedStateHandle
     private val _estado = MutableStateFlow(
@@ -52,8 +61,10 @@ class VerificacionViewModel(private val estadoGuardado: SavedStateHandle) : View
         if (reenvioDisponibleEn != null) {
             iniciarCuentaRegresiva(reenvioDisponibleEn)
         } else {
-            // TODO (#160): usar reenviar_en_segundos de la respuesta del registro en lugar de este valor
-            esperarReenvio(SEGUNDOS_REENVIO_INICIAL)
+            // Primera vez en la pantalla: los segundos vienen en la ruta. Desde Registro son los que
+            // mandó el servidor; desde Login son 0 y se puede pedir un código nuevo de inmediato.
+            val segundos = estadoGuardado.get<Int>(Rutas.ARG_REENVIAR_EN) ?: 0
+            if (segundos > 0) esperarReenvio(segundos)
         }
     }
 
@@ -84,23 +95,47 @@ class VerificacionViewModel(private val estadoGuardado: SavedStateHandle) : View
         }
     }
 
+    // POST /auth/verificar. Si el código es correcto, el repositorio guarda la sesión y se entra a la app.
     private fun verificar(codigo: String) {
-        // TODO (#160 y #161): llamar a SesionRepository.verificar(correo, codigo) con
-        // verificando = true mientras responde, y según la respuesta:
-        //  - éxito -> guardar la sesión y _eventos.send(EventoVerificacion.CorreoVerificado)
-        //  - error -> error = mensaje del servidor y vaciar las casillas (digitos = vacíos)
-        // Mientras no exista la capa de red, se da por bueno para probar la navegación.
-        _eventos.trySend(EventoVerificacion.CorreoVerificado)
+        _estado.update { it.copy(verificando = true, error = null) }
+
+        viewModelScope.launch {
+            sesionRepository.verificar(_estado.value.correo, codigo)
+                .onSuccess {
+                    _estado.update { it.copy(verificando = false) }
+                    _eventos.send(EventoVerificacion.CorreoVerificado)
+                }
+                .onFailure {
+                    // Código incorrecto, vencido, demasiados intentos o sin conexión:
+                    // se muestra el mensaje del servidor y se vacían las casillas para escribir otra vez
+                    val error = it.aErrorApi()
+                    _estado.update { estado ->
+                        estado.copy(verificando = false, error = error.mensaje, digitos = List(DIGITOS_CODIGO) { "" })
+                    }
+                }
+        }
     }
 
+    // POST /auth/reenviar-codigo
     fun reenviarCodigo() {
         if (!_estado.value.puedeReenviar) return
 
-        // TODO (#160): llamar a POST /auth/reenviar-codigo con reenviando = true mientras responde;
-        // en éxito vaciar las casillas y esperarReenvio(reenviar_en_segundos);
-        // en error 429 esperarReenvio(Retry-After) y mostrar el mensaje del servidor.
-        _estado.update { it.copy(digitos = List(DIGITOS_CODIGO) { "" }, error = null) }
-        esperarReenvio(SEGUNDOS_REENVIO_INICIAL)
+        _estado.update { it.copy(reenviando = true, error = null) }
+
+        viewModelScope.launch {
+            sesionRepository.reenviarCodigo(_estado.value.correo)
+                .onSuccess { segundos ->
+                    // El código anterior ya no sirve: se vacían las casillas y empieza otra espera
+                    _estado.update { it.copy(reenviando = false, digitos = List(DIGITOS_CODIGO) { "" }) }
+                    esperarReenvio(segundos)
+                }
+                .onFailure {
+                    val error = it.aErrorApi()
+                    _estado.update { estado -> estado.copy(reenviando = false, error = error.mensaje) }
+                    // Si se pidió antes de tiempo (429), el servidor dice cuánto falta en Retry-After
+                    error.reintentarEn?.let { segundos -> esperarReenvio(segundos) }
+                }
+        }
     }
 
     private fun esperarReenvio(segundos: Int) {
@@ -123,8 +158,13 @@ class VerificacionViewModel(private val estadoGuardado: SavedStateHandle) : View
         }
     }
 
-    private companion object {
-        const val SEGUNDOS_REENVIO_INICIAL = 60
-        const val CLAVE_REENVIO_EN = "reenvio_disponible_en"
+    companion object {
+        private const val CLAVE_REENVIO_EN = "reenvio_disponible_en"
+
+        // Cómo se crea el ViewModel: con su SavedStateHandle (trae el correo de la ruta)
+        // y el repositorio que arma UasnackApp
+        val Fabrica = viewModelFactory {
+            initializer { VerificacionViewModel(createSavedStateHandle(), uasnackApp().sesionRepository) }
+        }
     }
 }

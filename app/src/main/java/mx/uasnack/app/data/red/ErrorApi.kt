@@ -43,3 +43,14 @@ class ErrorApi(
         const val MENSAJE_DESCONOCIDO = "Ocurrió un error inesperado."
     }
 }
+
+// Convierte cualquier error en ErrorApi. Los repositorios ya regresan ErrorApi, pero si algo raro
+// se cuela (por ejemplo una respuesta que no se pudo leer), la pantalla muestra el mensaje genérico
+// en lugar de no mostrar nada.
+fun Throwable.aErrorApi(): ErrorApi =
+    this as? ErrorApi ?: ErrorApi(
+        status = 0,
+        codigo = ErrorApi.ERROR_DESCONOCIDO,
+        mensaje = ErrorApi.MENSAJE_DESCONOCIDO,
+        causa = this
+    )

@@ -15,10 +15,16 @@ object Rutas {
     // Verificación recibe el correo en la ruta. Al ir en la ruta, el ViewModel lo lee de su
     // SavedStateHandle y no se pierde aunque Android cierre la app en segundo plano.
     const val ARG_CORREO = "correo"
-    const val VERIFICACION = "verificacion/{$ARG_CORREO}"
+
+    // Segundos que hay que esperar para poder reenviar el código. Desde Registro llegan los que
+    // mandó el servidor (reenviar_en_segundos); desde Login es 0, porque el código anterior pudo
+    // haber vencido y el usuario debe poder pedir otro de inmediato.
+    const val ARG_REENVIAR_EN = "reenviarEn"
+    const val VERIFICACION = "verificacion/{$ARG_CORREO}?$ARG_REENVIAR_EN={$ARG_REENVIAR_EN}"
 
     // Arma la ruta real de Verificación. Uri.encode evita que un carácter del correo rompa la ruta.
-    fun verificacion(correo: String) = "verificacion/${Uri.encode(correo)}"
+    fun verificacion(correo: String, reenviarEnSegundos: Int = 0) =
+        "verificacion/${Uri.encode(correo)}?$ARG_REENVIAR_EN=$reenviarEnSegundos"
 
     // Pantallas del grafo principal (con sesión)
     const val TIENDAS = "tiendas"

@@ -54,7 +54,7 @@ import mx.uasnack.app.ui.tema.TemaUASnack
 @Composable
 fun VerificacionPantalla(
     alVerificar: () -> Unit,
-    viewModel: VerificacionViewModel = viewModel()
+    viewModel: VerificacionViewModel = viewModel(factory = VerificacionViewModel.Fabrica)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
@@ -89,6 +89,11 @@ private fun VerificacionContenido(
     LaunchedEffect(Unit) {
         val primeraVacia = estado.digitos.indexOfFirst { it.isEmpty() }
         enfoques[if (primeraVacia == -1) DIGITOS_CODIGO - 1 else primeraVacia].requestFocus()
+    }
+
+    // Si el código fue incorrecto, las casillas se vacían: el cursor regresa a la primera
+    LaunchedEffect(estado.error) {
+        if (estado.error != null && estado.digitos.all { it.isEmpty() }) enfoques[0].requestFocus()
     }
 
     Column(

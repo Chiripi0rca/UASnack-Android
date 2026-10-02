@@ -164,6 +164,35 @@ class SesionRepositoryTest {
         assertTrue(servidor.takeRequest().body.readUtf8().contains("\"acepto_terminos\":true"))
     }
 
+    // Las facultades llegan ya como modelo de dominio (id y nombre), sin el envoltorio "datos".
+    @Test
+    fun `facultades regresa la lista del servidor`() = runBlocking {
+        responder(200, """{"datos":[{"id":1,"nombre":"Facultad de Informática Culiacán","clave":"FIC"}],"meta":{"total":1}}""")
+
+        val facultades = repositorio.facultades().getOrThrow()
+
+        assertEquals(1, facultades.size)
+        assertEquals(1, facultades[0].id)
+        assertEquals("Facultad de Informática Culiacán", facultades[0].nombre)
+    }
+
+    // Reenviar el código regresa los segundos de espera; pedirlo antes de tiempo trae los que faltan.
+    @Test
+    fun `reenviar codigo regresa los segundos y el 429 trae Retry-After`() = runBlocking {
+        responder(200, """{"mensaje":"Si el correo está registrado...","reenviar_en_segundos":60}""")
+        assertEquals(60, repositorio.reenviarCodigo("ana@info.uas.edu.mx").getOrThrow())
+        assertTrue(servidor.takeRequest().body.readUtf8().contains("\"correo_institucional\":\"ana@info.uas.edu.mx\""))
+
+        servidor.enqueue(
+            MockResponse().setResponseCode(429).setHeader("Retry-After", "42")
+                .setBody("""{"error":{"codigo":"DEMASIADOS_INTENTOS","mensaje":"Demasiados intentos."}}""")
+        )
+        val error = repositorio.reenviarCodigo("ana@info.uas.edu.mx").exceptionOrNull() as ErrorApi
+
+        assertEquals(ErrorApi.DEMASIADOS_INTENTOS, error.codigo)
+        assertEquals(42, error.reintentarEn)
+    }
+
     private companion object {
         // Respuesta de /auth/login y /auth/verificar, igual que la manda el backend
         const val SESION = """{"token":"1|abc","usuario":{"id":7,"nombre":"Ana","apellido":"López",
