@@ -1,9 +1,8 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.UASnack" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources>
+    <!-- Tema de la ventana mientras arranca la app. Los colores reales están en ui/tema/ (Compose).
+         El fondo es el surface del Anexo B, para que no aparezca un destello blanco o negro
+         antes de que cargue Compose. -->
+    <style name="Theme.UASnack" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/superficie</item>
     </style>
-
-    <style name="Theme.UASnack" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
