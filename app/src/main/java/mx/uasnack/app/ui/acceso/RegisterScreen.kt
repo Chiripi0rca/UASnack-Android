@@ -12,7 +12,10 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(onLoginClick: () -> Unit = {}) {
+fun RegisterScreen(
+    onLoginClick: () -> Unit = {},
+    onRegistrado: (correo: String) -> Unit = {}
+) {
 
     var nombre by remember { mutableStateOf("") }
     var apellido by remember { mutableStateOf("") }
@@ -33,7 +36,7 @@ fun RegisterScreen(onLoginClick: () -> Unit = {}) {
     var facultadAbierta by remember { mutableStateOf(false) }
 
     // Posteriormente vendrán del backend
-    val facultades = emptyList<String>()
+    val facultades = listOf("Facultad de Informática")
 
     val fondo = Color(0xFFF7FBF9)
     val verde = Color(0xFF176C59)
@@ -213,7 +216,26 @@ fun RegisterScreen(onLoginClick: () -> Unit = {}) {
 
         Button(
             onClick = {
+                // Marca todos los campos como tocados para que se vean sus errores
+                nombreTocado = true
+                apellidoTocado = true
+                correoTocado = true
+                facultadTocado = true
+                passwordTocado = true
+                telefonoTocado = true
                 aceptaTocado = true
+
+                val formularioValido = nombre.isNotBlank() &&
+                        apellido.isNotBlank() &&
+                        Patterns.EMAIL_ADDRESS.matcher(correo).matches() &&
+                        facultad.isNotBlank() &&
+                        password.length >= 8 &&
+                        telefono.length == 10 &&
+                        acepta
+
+                // TODO: cuando exista la capa de red (#160), aquí se llama a POST auth/registro
+                // y solo se avisa si el servidor responde 201.
+                if (formularioValido) onRegistrado(correo.trim().lowercase())
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
