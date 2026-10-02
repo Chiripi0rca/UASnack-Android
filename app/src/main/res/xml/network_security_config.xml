@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release: solo HTTPS. Android bloquea cualquier petición http:// sin cifrar.
+     La versión de debug (src/debug/res/xml) reemplaza este archivo para poder usar el backend local. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

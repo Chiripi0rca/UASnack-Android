@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo en debug: permite http:// sin cifrar para hablar con el backend local
+     (10.0.2.2 desde el emulador, o la IP de la PC desde un celular físico en la misma red).
+     El APK de release usa src/main/res/xml/network_security_config.xml, que solo permite HTTPS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
