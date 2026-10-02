@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Solo para el tema XML de arranque (themes.xml). En Compose se usa ui/tema/Color.kt. -->
+    <color name="superficie">#FFF6FBF8</color>
 </resources>
