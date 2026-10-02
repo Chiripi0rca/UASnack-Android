@@ -29,11 +29,15 @@ class MainActivity : ComponentActivity() {
         // Solo hace algo en debug: pide el permiso para hablar con el backend local (Android 17+)
         pedirPermisoRedLocal(this)
 
+        // El repositorio de sesión lo arma UasnackApp una sola vez para toda la app.
+        // Se le pasa a la navegación para que decida si abrir en el login o en Tiendas.
+        val sesionRepository = (application as UasnackApp).sesionRepository
+
         setContent {
             TemaUASnack {
                 // Surface pinta el fondo (surface del Anexo B) y el color de texto por defecto
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavegacionUASnack()
+                    NavegacionUASnack(sesionRepository)
                 }
             }
         }

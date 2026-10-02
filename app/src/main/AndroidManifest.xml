@@ -5,7 +5,10 @@
     <!-- Para hablar con la API -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- android:name=".UasnackApp": Android crea UasnackApp al abrir la app, antes que cualquier
+         pantalla. Ahí se arman una sola vez la API, DataStore y los repositorios (#161). -->
     <application
+        android:name=".UasnackApp"
         android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
