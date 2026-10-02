@@ -1,6 +1,7 @@
 package mx.uasnack.app.ui.navegacion
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,19 +9,36 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.flow.first
+import mx.uasnack.app.data.repositorio.SesionRepository
 import mx.uasnack.app.ui.acceso.LoginPantalla
 import mx.uasnack.app.ui.acceso.RegistroPantalla
 import mx.uasnack.app.ui.acceso.VerificacionPantalla
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
+// sesionRepository: se usa para saber, al abrir la app, si ya hay una sesión guardada (#161).
 @Composable
-fun NavegacionUASnack() {
+fun NavegacionUASnack(sesionRepository: SesionRepository) {
+    // ¿Hay sesión guardada? null mientras se lee DataStore; después true o false.
+    // produceState corre el bloque una sola vez y redibuja la pantalla cuando cambia "value".
+    // first() espera a que DataStore lea el disco y toma el token guardado (o null).
+    val haySesion = produceState<Boolean?>(initialValue = null) {
+        value = sesionRepository.tokenGuardado().first() != null
+    }.value
+
+    // Mientras se lee DataStore (unos milisegundos) no se dibuja nada: solo se ve el fondo del tema.
+    // Si se dibujara el NavHost antes, quien ya tenía sesión vería un parpadeo del login.
+    if (haySesion == null) return
+
     val navController = rememberNavController()
 
-    // TODO (#161): si SesionRepository.tokenGuardado() ya tiene token, empezar en PRINCIPAL.
-    // Hay que esperar a leer DataStore antes de dibujar el NavHost; si no, se ve un parpadeo del login.
-    NavHost(navController = navController, startDestination = Rutas.ACCESO) {
+    // Con sesión guardada la app abre directo en el grafo principal (Tiendas);
+    // sin sesión, en el grafo de acceso (Login).
+    NavHost(
+        navController = navController,
+        startDestination = if (haySesion) Rutas.PRINCIPAL else Rutas.ACCESO
+    ) {
 
         // Grafo de acceso: pantallas para quien no tiene sesión
         navigation(startDestination = Rutas.LOGIN, route = Rutas.ACCESO) {
