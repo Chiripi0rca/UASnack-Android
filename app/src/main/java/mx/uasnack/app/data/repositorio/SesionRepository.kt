@@ -5,10 +5,12 @@ import mx.uasnack.app.data.local.SesionAlmacen
 import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.ErrorApi
 import mx.uasnack.app.data.red.dto.LoginRequest
+import mx.uasnack.app.data.red.dto.ReenviarCodigoRequest
 import mx.uasnack.app.data.red.dto.RegistroRequest
 import mx.uasnack.app.data.red.dto.SesionDto
 import mx.uasnack.app.data.red.dto.VerificarRequest
 import mx.uasnack.app.data.red.dto.aDominio
+import mx.uasnack.app.domain.modelo.Facultad
 import mx.uasnack.app.domain.modelo.Usuario
 
 // Única puerta de la app para la sesión: login, registro, verificación y cerrar sesión (#161).
@@ -55,6 +57,22 @@ class SesionRepository(
         Result.success(respuesta.reenviarEnSegundos)
     } catch (e: ErrorApi) {
         // Por ejemplo VALIDACION (422) con el error de cada campo en e.campos
+        Result.failure(e)
+    }
+
+    // GET /facultades. Las que se muestran en el registro, ya como modelo de dominio.
+    suspend fun facultades(): Result<List<Facultad>> = try {
+        Result.success(api.obtenerFacultades().datos.map { it.aDominio() })
+    } catch (e: ErrorApi) {
+        Result.failure(e)
+    }
+
+    // POST /auth/reenviar-codigo. Pide un código nuevo para el correo (invalida los anteriores).
+    // Regresa los segundos que hay que esperar para volver a pedir otro.
+    // Si se pide antes de tiempo, el error trae los segundos que faltan en reintentarEn (Retry-After).
+    suspend fun reenviarCodigo(correo: String): Result<Int> = try {
+        Result.success(api.reenviarCodigo(ReenviarCodigoRequest(correoInstitucional = correo)).reenviarEnSegundos)
+    } catch (e: ErrorApi) {
         Result.failure(e)
     }
 
