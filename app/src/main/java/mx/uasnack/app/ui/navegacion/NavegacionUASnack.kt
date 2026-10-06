@@ -74,10 +74,11 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             }
         }
 
-        // Grafo principal: pantallas para quien ya inició sesión
+        // Grafo principal: pantallas para quien ya inició sesión.
+        // Cada pantalla va dentro de ConBarraInferior para que tenga la barra de navegación (#229).
         navigation(startDestination = Rutas.TIENDAS, route = Rutas.PRINCIPAL) {
             composable(Rutas.TIENDAS) {
-                TiendasPantalla()
+                ConBarraInferior(navController) { TiendasPantalla() }
             }
         }
     }
