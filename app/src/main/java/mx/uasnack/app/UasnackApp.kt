@@ -8,9 +8,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import mx.uasnack.app.data.local.SesionAlmacen
+import mx.uasnack.app.data.local.UasnackBaseDatos
 import mx.uasnack.app.data.local.dataStoreSesion
 import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.ModuloRed
+import mx.uasnack.app.data.repositorio.CatalogoRepository
 import mx.uasnack.app.data.repositorio.SesionRepository
 
 // Se crea una sola vez al abrir la app, antes que cualquier pantalla (está registrada en
@@ -43,6 +45,12 @@ class UasnackApp : Application() {
 
     // Lo que usarán los ViewModels de acceso, registro y verificación
     val sesionRepository: SesionRepository by lazy { SesionRepository(api, sesionAlmacen) }
+
+    // Base de datos local (Room): hoy solo la caché del catálogo
+    val baseDatos: UasnackBaseDatos by lazy { UasnackBaseDatos.crear(this) }
+
+    // Lo que usarán los ViewModels de Tiendas, Catálogo y Detalle de producto (#228)
+    val catalogoRepository: CatalogoRepository by lazy { CatalogoRepository(api, baseDatos.catalogoDao()) }
 }
 
 // Para las fábricas de los ViewModels (viewModelFactory { initializer { ... } }):
