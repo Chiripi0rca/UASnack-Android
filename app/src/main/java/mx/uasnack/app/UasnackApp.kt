@@ -7,11 +7,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import mx.uasnack.app.data.local.CarritoAlmacen
 import mx.uasnack.app.data.local.SesionAlmacen
 import mx.uasnack.app.data.local.UasnackBaseDatos
+import mx.uasnack.app.data.local.dataStoreCarrito
 import mx.uasnack.app.data.local.dataStoreSesion
 import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.ModuloRed
+import mx.uasnack.app.data.repositorio.CarritoRepository
 import mx.uasnack.app.data.repositorio.CatalogoRepository
 import mx.uasnack.app.data.repositorio.SesionRepository
 
@@ -51,6 +54,9 @@ class UasnackApp : Application() {
 
     // Lo que usarán los ViewModels de Tiendas, Catálogo y Detalle de producto (#228)
     val catalogoRepository: CatalogoRepository by lazy { CatalogoRepository(api, baseDatos.catalogoDao()) }
+
+    // Lo que usarán Detalle de producto (#51) y Carrito (#170). Se guarda en DataStore (#231).
+    val carritoRepository: CarritoRepository by lazy { CarritoRepository(CarritoAlmacen(dataStoreCarrito)) }
 }
 
 // Para las fábricas de los ViewModels (viewModelFactory { initializer { ... } }):
