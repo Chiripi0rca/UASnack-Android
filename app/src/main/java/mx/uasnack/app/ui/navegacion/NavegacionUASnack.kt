@@ -14,6 +14,7 @@ import mx.uasnack.app.data.repositorio.SesionRepository
 import mx.uasnack.app.ui.acceso.LoginPantalla
 import mx.uasnack.app.ui.acceso.RegistroPantalla
 import mx.uasnack.app.ui.acceso.VerificacionPantalla
+import mx.uasnack.app.ui.catalogo.CatalogoPantalla
 import mx.uasnack.app.ui.componentes.PantallaPendiente
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
@@ -79,7 +80,23 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
         // Cada pantalla va dentro de ConBarraInferior para que tenga la barra de navegación (#229).
         navigation(startDestination = Rutas.TIENDAS, route = Rutas.PRINCIPAL) {
             composable(Rutas.TIENDAS) {
-                ConBarraInferior(navController) { TiendasPantalla() }
+                ConBarraInferior(navController) {
+                    TiendasPantalla(alAbrirTienda = { idTienda -> navController.navigate(Rutas.catalogo(idTienda)) })
+                }
+            }
+
+            // Catálogo de una tienda (#48): el id va en la ruta y el ViewModel lo lee de SavedStateHandle
+            composable(
+                route = Rutas.CATALOGO,
+                arguments = listOf(navArgument(Rutas.ARG_ID_TIENDA) { type = NavType.IntType })
+            ) {
+                ConBarraInferior(navController) {
+                    CatalogoPantalla(
+                        // Detalle de producto llega con la #51
+                        alAbrirProducto = {},
+                        alVolver = { navController.popBackStack() }
+                    )
+                }
             }
 
             // Destinos de la barra que aún no tienen pantalla (#229)
