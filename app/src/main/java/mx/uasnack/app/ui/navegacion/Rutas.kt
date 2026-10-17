@@ -38,4 +38,9 @@ object Rutas {
     const val ARG_ID_TIENDA = "idTienda"
     const val CATALOGO = "tiendas/{$ARG_ID_TIENDA}"
     fun catalogo(idTienda: Int) = "tiendas/$idTienda"
+
+    // Detalle de un producto (#51)
+    const val ARG_ID_PRODUCTO = "idProducto"
+    const val PRODUCTO = "productos/{$ARG_ID_PRODUCTO}"
+    fun producto(idProducto: Int) = "productos/$idProducto"
 }

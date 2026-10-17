@@ -15,6 +15,7 @@ import mx.uasnack.app.ui.acceso.LoginPantalla
 import mx.uasnack.app.ui.acceso.RegistroPantalla
 import mx.uasnack.app.ui.acceso.VerificacionPantalla
 import mx.uasnack.app.ui.catalogo.CatalogoPantalla
+import mx.uasnack.app.ui.catalogo.DetalleProductoPantalla
 import mx.uasnack.app.ui.componentes.PantallaPendiente
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
@@ -92,10 +93,19 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             ) {
                 ConBarraInferior(navController) {
                     CatalogoPantalla(
-                        // Detalle de producto llega con la #51
-                        alAbrirProducto = {},
+                        alAbrirProducto = { idProducto -> navController.navigate(Rutas.producto(idProducto)) },
                         alVolver = { navController.popBackStack() }
                     )
+                }
+            }
+
+            // Detalle de producto (#51)
+            composable(
+                route = Rutas.PRODUCTO,
+                arguments = listOf(navArgument(Rutas.ARG_ID_PRODUCTO) { type = NavType.IntType })
+            ) {
+                ConBarraInferior(navController) {
+                    DetalleProductoPantalla(alVolver = { navController.popBackStack() })
                 }
             }
 
