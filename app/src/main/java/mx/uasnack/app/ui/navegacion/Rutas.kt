@@ -43,4 +43,7 @@ object Rutas {
     const val ARG_ID_PRODUCTO = "idProducto"
     const val PRODUCTO = "productos/{$ARG_ID_PRODUCTO}"
     fun producto(idProducto: Int) = "productos/$idProducto"
+
+    // Carrito (#170)
+    const val CARRITO = "carrito"
 }

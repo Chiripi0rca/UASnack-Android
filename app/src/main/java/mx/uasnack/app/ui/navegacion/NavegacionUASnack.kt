@@ -17,6 +17,7 @@ import mx.uasnack.app.ui.acceso.VerificacionPantalla
 import mx.uasnack.app.ui.catalogo.CatalogoPantalla
 import mx.uasnack.app.ui.catalogo.DetalleProductoPantalla
 import mx.uasnack.app.ui.componentes.PantallaPendiente
+import mx.uasnack.app.ui.pedido.CarritoPantalla
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
@@ -94,7 +95,9 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
                 ConBarraInferior(navController) {
                     CatalogoPantalla(
                         alAbrirProducto = { idProducto -> navController.navigate(Rutas.producto(idProducto)) },
-                        alVolver = { navController.popBackStack() }
+                        alVolver = { navController.popBackStack() },
+                        // Desde la #170 ya hay a dónde ir: aparece el botón "Ver carrito"
+                        alIrACarrito = { navController.navigate(Rutas.CARRITO) }
                     )
                 }
             }
@@ -106,6 +109,28 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             ) {
                 ConBarraInferior(navController) {
                     DetalleProductoPantalla(alVolver = { navController.popBackStack() })
+                }
+            }
+
+            // Carrito (#170)
+            composable(Rutas.CARRITO) {
+                ConBarraInferior(navController) {
+                    CarritoPantalla(
+                        // Al quitar la última línea (o "Agregar más productos"): al catálogo de esa tienda,
+                        // sacando Carrito de la pila para que atrás no regrese a un carrito vacío
+                        alRegresarACatalogo = { idTienda ->
+                            navController.navigate(Rutas.catalogo(idTienda)) {
+                                popUpTo(Rutas.CARRITO) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                        alIrATiendas = {
+                            navController.navigate(Rutas.TIENDAS) {
+                                popUpTo(Rutas.TIENDAS)
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
             }
 
