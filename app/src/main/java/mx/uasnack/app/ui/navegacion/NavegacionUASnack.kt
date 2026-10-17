@@ -14,6 +14,7 @@ import mx.uasnack.app.data.repositorio.SesionRepository
 import mx.uasnack.app.ui.acceso.LoginPantalla
 import mx.uasnack.app.ui.acceso.RegistroPantalla
 import mx.uasnack.app.ui.acceso.VerificacionPantalla
+import mx.uasnack.app.ui.componentes.PantallaPendiente
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
@@ -80,6 +81,11 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             composable(Rutas.TIENDAS) {
                 ConBarraInferior(navController) { TiendasPantalla() }
             }
+
+            // Destinos de la barra que aún no tienen pantalla (#229)
+            composable(Rutas.PEDIDOS) { ConBarraInferior(navController) { PantallaPendiente("Pedidos") } }
+            composable(Rutas.PAGOS) { ConBarraInferior(navController) { PantallaPendiente("Pagos") } }
+            composable(Rutas.PERFIL) { ConBarraInferior(navController) { PantallaPendiente("Perfil") } }
         }
     }
 }

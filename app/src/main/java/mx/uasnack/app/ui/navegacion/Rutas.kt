@@ -28,4 +28,9 @@ object Rutas {
 
     // Pantallas del grafo principal (con sesión)
     const val TIENDAS = "tiendas"
+
+    // Destinos de la barra inferior (#229). Pedidos, Pagos y Perfil todavía son pantallas pendientes.
+    const val PEDIDOS = "pedidos"
+    const val PAGOS = "pagos"
+    const val PERFIL = "perfil"
 }
