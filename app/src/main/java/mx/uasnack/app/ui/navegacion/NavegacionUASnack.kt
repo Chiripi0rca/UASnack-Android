@@ -14,6 +14,10 @@ import mx.uasnack.app.data.repositorio.SesionRepository
 import mx.uasnack.app.ui.acceso.LoginPantalla
 import mx.uasnack.app.ui.acceso.RegistroPantalla
 import mx.uasnack.app.ui.acceso.VerificacionPantalla
+import mx.uasnack.app.ui.catalogo.CatalogoPantalla
+import mx.uasnack.app.ui.catalogo.DetalleProductoPantalla
+import mx.uasnack.app.ui.componentes.PantallaPendiente
+import mx.uasnack.app.ui.pedido.CarritoPantalla
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
@@ -78,8 +82,62 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
         // Cada pantalla va dentro de ConBarraInferior para que tenga la barra de navegación (#229).
         navigation(startDestination = Rutas.TIENDAS, route = Rutas.PRINCIPAL) {
             composable(Rutas.TIENDAS) {
-                ConBarraInferior(navController) { TiendasPantalla() }
+                ConBarraInferior(navController) {
+                    TiendasPantalla(alAbrirTienda = { idTienda -> navController.navigate(Rutas.catalogo(idTienda)) })
+                }
             }
+
+            // Catálogo de una tienda (#48): el id va en la ruta y el ViewModel lo lee de SavedStateHandle
+            composable(
+                route = Rutas.CATALOGO,
+                arguments = listOf(navArgument(Rutas.ARG_ID_TIENDA) { type = NavType.IntType })
+            ) {
+                ConBarraInferior(navController) {
+                    CatalogoPantalla(
+                        alAbrirProducto = { idProducto -> navController.navigate(Rutas.producto(idProducto)) },
+                        alVolver = { navController.popBackStack() },
+                        // Desde la #170 ya hay a dónde ir: aparece el botón "Ver carrito"
+                        alIrACarrito = { navController.navigate(Rutas.CARRITO) }
+                    )
+                }
+            }
+
+            // Detalle de producto (#51)
+            composable(
+                route = Rutas.PRODUCTO,
+                arguments = listOf(navArgument(Rutas.ARG_ID_PRODUCTO) { type = NavType.IntType })
+            ) {
+                ConBarraInferior(navController) {
+                    DetalleProductoPantalla(alVolver = { navController.popBackStack() })
+                }
+            }
+
+            // Carrito (#170)
+            composable(Rutas.CARRITO) {
+                ConBarraInferior(navController) {
+                    CarritoPantalla(
+                        // Al quitar la última línea (o "Agregar más productos"): al catálogo de esa tienda,
+                        // sacando Carrito de la pila para que atrás no regrese a un carrito vacío
+                        alRegresarACatalogo = { idTienda ->
+                            navController.navigate(Rutas.catalogo(idTienda)) {
+                                popUpTo(Rutas.CARRITO) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                        alIrATiendas = {
+                            navController.navigate(Rutas.TIENDAS) {
+                                popUpTo(Rutas.TIENDAS)
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
+
+            // Destinos de la barra que aún no tienen pantalla (#229)
+            composable(Rutas.PEDIDOS) { ConBarraInferior(navController) { PantallaPendiente("Pedidos") } }
+            composable(Rutas.PAGOS) { ConBarraInferior(navController) { PantallaPendiente("Pagos") } }
+            composable(Rutas.PERFIL) { ConBarraInferior(navController) { PantallaPendiente("Perfil") } }
         }
     }
 }

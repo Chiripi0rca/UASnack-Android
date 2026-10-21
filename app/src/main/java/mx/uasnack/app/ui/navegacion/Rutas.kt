@@ -28,4 +28,22 @@ object Rutas {
 
     // Pantallas del grafo principal (con sesión)
     const val TIENDAS = "tiendas"
+
+    // Destinos de la barra inferior (#229). Pedidos, Pagos y Perfil todavía son pantallas pendientes.
+    const val PEDIDOS = "pedidos"
+    const val PAGOS = "pagos"
+    const val PERFIL = "perfil"
+
+    // Catálogo de una tienda (#48). Empieza con "tiendas/" para que la barra marque la pestaña Tiendas.
+    const val ARG_ID_TIENDA = "idTienda"
+    const val CATALOGO = "tiendas/{$ARG_ID_TIENDA}"
+    fun catalogo(idTienda: Int) = "tiendas/$idTienda"
+
+    // Detalle de un producto (#51)
+    const val ARG_ID_PRODUCTO = "idProducto"
+    const val PRODUCTO = "productos/{$ARG_ID_PRODUCTO}"
+    fun producto(idProducto: Int) = "productos/$idProducto"
+
+    // Carrito (#170)
+    const val CARRITO = "carrito"
 }
