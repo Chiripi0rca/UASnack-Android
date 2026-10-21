@@ -31,7 +31,7 @@ android {
             buildConfigField("String", "API_BASE_URL","\"http://10.0.2.2:8000/api/v1/\" ")
         }
         release {
-            buildConfigField("String", "API_BASE_URL","\"http://10.0.2.2:8000/api/v1/\" ")
+            buildConfigField("String", "API_BASE_URL", "\"https://server.tailf3796d.ts.net:10000/api/v1/\"")
             optimization {
                 enable = false
             }
