@@ -67,3 +67,56 @@ data class CodigoEnviadoDto(
     val mensaje: String,
     @SerialName("reenviar_en_segundos") val reenviarEnSegundos: Int
 )
+
+// --- Sprint 03 ---
+
+// GET /auth/yo (#218 del backend): el usuario con datos frescos del servidor, para Perfil (#220).
+// Llega envuelto en "usuario", igual que en login.
+@Serializable
+data class PerfilRespuestaDto(
+    val usuario: PerfilDto
+)
+
+@Serializable
+data class PerfilDto(
+    val id: Int,
+    val nombre: String,
+    val apellido: String,
+    @SerialName("correo_institucional") val correoInstitucional: String,
+    val facultad: FacultadResumenDto? = null,
+    val rol: String,
+    val reputacion: Int,
+    // Pedidos no recogidos: de esto depende el color de la tarjeta de reputación (HU-17)
+    val faltas: Int = 0
+)
+
+@Serializable
+data class FacultadResumenDto(
+    val id: Int,
+    val nombre: String
+)
+
+// HU-33: recuperar y cambiar la contraseña. Las tres rutas responden 204 sin contenido.
+
+// POST /auth/olvide-password: manda el código. Responde 204 exista o no el correo.
+@Serializable
+data class OlvidePasswordRequest(
+    @SerialName("correo_institucional") val correoInstitucional: String
+)
+
+// POST /auth/restablecer-password: código + contraseña nueva. Cierra todas las sesiones.
+@Serializable
+data class RestablecerPasswordRequest(
+    @SerialName("correo_institucional") val correoInstitucional: String,
+    val codigo: String,
+    val password: String,
+    @SerialName("password_confirmation") val passwordConfirmation: String
+)
+
+// POST /auth/cambiar-password: con sesión, pide la contraseña actual.
+@Serializable
+data class CambiarPasswordRequest(
+    @SerialName("password_actual") val passwordActual: String,
+    val password: String,
+    @SerialName("password_confirmation") val passwordConfirmation: String
+)

@@ -16,6 +16,7 @@ import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.ModuloRed
 import mx.uasnack.app.data.repositorio.CarritoRepository
 import mx.uasnack.app.data.repositorio.CatalogoRepository
+import mx.uasnack.app.data.repositorio.PedidoRepository
 import mx.uasnack.app.data.repositorio.SesionRepository
 
 // Se crea una sola vez al abrir la app, antes que cualquier pantalla (está registrada en
@@ -57,6 +58,9 @@ class UasnackApp : Application() {
 
     // Lo que usarán Detalle de producto (#51) y Carrito (#170). Se guarda en DataStore (#231).
     val carritoRepository: CarritoRepository by lazy { CarritoRepository(CarritoAlmacen(dataStoreCarrito)) }
+
+    // Lo que usarán Elección de retiro (#55) y el panel "Voy saliendo" (#60). Siempre va a la red.
+    val pedidoRepository: PedidoRepository by lazy { PedidoRepository(api) }
 }
 
 // Para las fábricas de los ViewModels (viewModelFactory { initializer { ... } }):
