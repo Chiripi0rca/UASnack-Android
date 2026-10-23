@@ -46,4 +46,20 @@ object Rutas {
 
     // Carrito (#170)
     const val CARRITO = "carrito"
+
+    // --- Sprint 03 (esqueleto) ---
+
+    // Elección de retiro (#55): franja o "voy saliendo" para el carrito de una tienda
+    const val RETIRO = "retiro/{$ARG_ID_TIENDA}"
+    fun retiro(idTienda: Int) = "retiro/$idTienda"
+
+    // HU-33 (Josef). Sin sesión, en el grafo de acceso: "Olvidé mi contraseña" manda el código y
+    // "Nueva contraseña" recibe el correo en la ruta (como Verificación) para pedir código y contraseña.
+    const val OLVIDE_PASSWORD = "olvide-password"
+    const val NUEVA_PASSWORD = "nueva-password/{$ARG_CORREO}"
+    fun nuevaPassword(correo: String) = "nueva-password/${Uri.encode(correo)}"
+
+    // HU-33 (Josef). Con sesión, desde el botón de Perfil (#220). Empieza con "perfil/" para que
+    // la barra siga marcando la pestaña Perfil.
+    const val CAMBIAR_PASSWORD = "perfil/cambiar-password"
 }
