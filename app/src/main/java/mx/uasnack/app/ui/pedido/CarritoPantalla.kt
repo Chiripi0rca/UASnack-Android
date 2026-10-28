@@ -37,6 +37,7 @@ import mx.uasnack.app.ui.tema.EstiloDatos
 fun CarritoPantalla(
     alRegresarACatalogo: (Int) -> Unit,
     alIrATiendas: () -> Unit,
+    alContinuar: (idTienda: Int) -> Unit,
     viewModel: CarritoViewModel = viewModel(factory = CarritoViewModel.Fabrica)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -88,11 +89,10 @@ fun CarritoPantalla(
                         }
                     }
                 }
-                // "Continuar" lleva a Elección de retiro (pantalla 8), que aún no existe: deshabilitado
+                // "Continuar" lleva a Elección de retiro (pantalla 8, #55)
                 BotonPrincipal(
                     texto = "Continuar · ${formatearPrecio(estado.carrito.totalLocal)}",
-                    alPulsar = {},
-                    habilitado = false,
+                    alPulsar = { estado.carrito.idTienda?.let(alContinuar) },
                     modifier = Modifier.padding(16.dp)
                 )
             }

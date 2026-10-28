@@ -18,6 +18,7 @@ import mx.uasnack.app.ui.catalogo.CatalogoPantalla
 import mx.uasnack.app.ui.catalogo.DetalleProductoPantalla
 import mx.uasnack.app.ui.componentes.PantallaPendiente
 import mx.uasnack.app.ui.pedido.CarritoPantalla
+import mx.uasnack.app.ui.pedido.EleccionRetiroPantalla
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
@@ -129,8 +130,19 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
                                 popUpTo(Rutas.TIENDAS)
                                 launchSingleTop = true
                             }
-                        }
+                        },
+                        alContinuar = { idTienda -> navController.navigate(Rutas.retiro(idTienda)) }
                     )
+                }
+            }
+
+            // Elección de retiro (#55)
+            composable(
+                route = Rutas.RETIRO,
+                arguments = listOf(navArgument(Rutas.ARG_ID_TIENDA) { type = NavType.IntType })
+            ) {
+                ConBarraInferior(navController) {
+                    EleccionRetiroPantalla(alVolver = { navController.popBackStack() })
                 }
             }
 
