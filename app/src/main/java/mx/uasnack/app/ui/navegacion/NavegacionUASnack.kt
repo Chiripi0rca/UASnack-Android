@@ -20,6 +20,7 @@ import mx.uasnack.app.ui.componentes.PantallaPendiente
 import mx.uasnack.app.ui.pedido.CarritoPantalla
 import mx.uasnack.app.ui.pedido.EleccionRetiroPantalla
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
+import mx.uasnack.app.ui.perfil.PerfilPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
 // sesionRepository: se usa para saber, al abrir la app, si ya hay una sesión guardada (#161).
@@ -149,7 +150,23 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             // Destinos de la barra que aún no tienen pantalla (#229)
             composable(Rutas.PEDIDOS) { ConBarraInferior(navController) { PantallaPendiente("Pedidos") } }
             composable(Rutas.PAGOS) { ConBarraInferior(navController) { PantallaPendiente("Pagos") } }
-            composable(Rutas.PERFIL) { ConBarraInferior(navController) { PantallaPendiente("Perfil") } }
+            composable(Rutas.PERFIL) {
+                ConBarraInferior(navController) {
+                    PerfilPantalla(
+                        alCambiarPassword = {
+                            navController.navigate(Rutas.CAMBIAR_PASSWORD)
+                        },
+                        alCerrarSesion = {
+                            navController.navigate(Rutas.ACCESO) {
+                                popUpTo(Rutas.PRINCIPAL) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
         }
     }
 }
