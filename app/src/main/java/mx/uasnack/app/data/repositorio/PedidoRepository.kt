@@ -27,10 +27,18 @@ class PedidoRepository(
         api.obtenerFranjas(idTienda, minutos).datos.map { it.aDominio() }
     }
 
-    // #175: GET /tiendas/{id}/espera → api.obtenerEspera(idTienda, minutos).datos
-    @Suppress("UNUSED_PARAMETER")
-    suspend fun espera(idTienda: Int, minutos: Int): Result<Estimado> =
-        Result.success(ESPERA_DE_EJEMPLO)
+    // #175: GET /tiendas/{id}/espera
+    suspend fun espera(idTienda: Int, minutos: Int): Result<Estimado> = intentar {
+        api.obtenerEspera(idTienda, minutos).datos.let { dto ->
+            Estimado(
+                min = dto.min,
+                max = dto.max,
+                saturada = dto.saturada,
+                pedidosEnCocina = dto.pedidosEnCocina,
+                voySaliendoDisponible = dto.voySaliendoDisponible
+            )
+        }
+    }
 
     // Convierte el resultado en Result: los ErrorApi (sin red, 401, 404, 422...) regresan como failure
     // con su código y mensaje del servidor.
@@ -40,15 +48,7 @@ class PedidoRepository(
         Result.failure(e)
     }
 
-    private companion object {
-        val ESPERA_DE_EJEMPLO = Estimado(
-            min = 16,
-            max = 22,
-            saturada = true,
-            pedidosEnCocina = 14,
-            voySaliendoDisponible = true
-        )
-    }
+
 }
 
 private fun FranjaDto.aDominio() = Franja(
