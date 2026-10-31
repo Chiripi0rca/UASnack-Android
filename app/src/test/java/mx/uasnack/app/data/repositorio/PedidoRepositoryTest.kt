@@ -84,6 +84,37 @@ class PedidoRepositoryTest {
         assertEquals("NO_ENCONTRADO", (resultado.exceptionOrNull() as ErrorApi).codigo)
     }
 
+    @Test
+    fun `la espera llega del servidor con los datos correctos`() = runBlocking {
+        servidor.enqueue(MockResponse().setBody(ESPERA))
+
+        val estimado = repositorio.espera(
+            idTienda = 3,
+            minutos = 18
+        ).getOrThrow()
+
+        assertEquals(16, estimado.min)
+        assertEquals(22, estimado.max)
+        assertTrue(estimado.saturada)
+        assertEquals(14, estimado.pedidosEnCocina)
+        assertTrue(estimado.voySaliendoDisponible)
+    }
+
+    @Test
+    fun `consulta la espera de la tienda con los minutos del carrito`() = runBlocking {
+        servidor.enqueue(MockResponse().setBody(ESPERA))
+
+        repositorio.espera(
+            idTienda = 3,
+            minutos = 18
+        )
+
+        assertEquals(
+            "/api/v1/tiendas/3/espera?minutos=18",
+            servidor.takeRequest().path
+        )
+    }
+
     private companion object {
         const val FRANJAS = """
             {"datos":[
@@ -91,5 +122,17 @@ class PedidoRepositoryTest {
               {"fecha":"2026-10-26","inicio":"11:10","fin":"11:20","minutos_restantes":4,"disponible":false,"descuento":10}
             ],"meta":{"total":2}}
         """
+
+        const val ESPERA = """
+    {
+        "datos": {
+            "min": 16,
+            "max": 22,
+            "saturada": true,
+            "pedidos_en_cocina": 14,
+            "voy_saliendo_disponible": true
+        }
+    }
+"""
     }
 }
