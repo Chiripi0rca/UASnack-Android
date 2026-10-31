@@ -3,11 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Para hablar con la API -->
-
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <uses-permission
-        android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <!-- android:name=".UasnackApp": Android crea UasnackApp al abrir la app, antes que cualquier
          pantalla. Ahí se arman una sola vez la API, DataStore y los repositorios (#161). -->
     <application
