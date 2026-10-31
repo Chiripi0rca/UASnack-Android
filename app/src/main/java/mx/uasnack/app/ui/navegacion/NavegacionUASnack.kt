@@ -23,6 +23,7 @@ import mx.uasnack.app.ui.tiendas.TiendasPantalla
 import mx.uasnack.app.ui.perfil.PerfilPantalla
 import mx.uasnack.app.ui.acceso.OlvidePasswordPantalla
 import mx.uasnack.app.ui.acceso.NuevaPasswordPantalla
+import mx.uasnack.app.ui.perfil.CambiarPasswordPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
 // sesionRepository: se usa para saber, al abrir la app, si ya hay una sesión guardada (#161).
@@ -221,6 +222,19 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
                                 }
                                 launchSingleTop = true
                             }
+                        }
+                    )
+                }
+            }
+            // Cambiar contraseña desde Perfil (#216).
+            composable(Rutas.CAMBIAR_PASSWORD) {
+
+                ConBarraInferior(navController) {
+
+                    CambiarPasswordPantalla(
+
+                        alVolverPerfil = {
+                            navController.popBackStack()
                         }
                     )
                 }
