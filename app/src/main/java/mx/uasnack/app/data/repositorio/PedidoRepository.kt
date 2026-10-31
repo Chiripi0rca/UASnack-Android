@@ -5,6 +5,7 @@ import mx.uasnack.app.data.red.ErrorApi
 import mx.uasnack.app.data.red.dto.FranjaDto
 import mx.uasnack.app.domain.modelo.Estimado
 import mx.uasnack.app.domain.modelo.Franja
+import mx.uasnack.app.domain.modelo.FranjasDelDia
 
 // Única puerta de la app para lo que pasa al pedir (Sprint 03).
 // Cada función la completa su tarea:
@@ -23,8 +24,14 @@ class PedidoRepository(
 
     // #173: GET /tiendas/{id}/franjas. Las próximas franjas de la tienda (máximo 8); las llenas para
     // este pedido llegan con disponible = false y se muestran deshabilitadas, nunca se ocultan.
-    suspend fun franjas(idTienda: Int, minutos: Int): Result<List<Franja>> = intentar {
-        api.obtenerFranjas(idTienda, minutos).datos.map { it.aDominio() }
+    // Del "meta" se toma si el pedido cabe hoy y cuánto cabe como máximo (aviso de pedido grande).
+    suspend fun franjas(idTienda: Int, minutos: Int): Result<FranjasDelDia> = intentar {
+        val respuesta = api.obtenerFranjas(idTienda, minutos)
+        FranjasDelDia(
+            franjas = respuesta.datos.map { it.aDominio() },
+            cabeHoy = respuesta.meta.cabeHoy,
+            minutosMaximosHoy = respuesta.meta.minutosMaximosHoy
+        )
     }
 
     // #175: GET /tiendas/{id}/espera

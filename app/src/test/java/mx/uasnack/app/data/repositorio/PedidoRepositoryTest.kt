@@ -40,7 +40,7 @@ class PedidoRepositoryTest {
     fun `las franjas llegan del servidor con la forma acordada`() = runBlocking {
         servidor.enqueue(MockResponse().setBody(FRANJAS))
 
-        val franjas = repositorio.franjas(idTienda = 3, minutos = 18).getOrThrow()
+        val franjas = repositorio.franjas(idTienda = 3, minutos = 18).getOrThrow().franjas
 
         assertEquals(listOf("11:00", "11:10"), franjas.map { it.inicio })
         assertEquals("11:10", franjas[0].fin)
@@ -51,6 +51,27 @@ class PedidoRepositoryTest {
         // La llena no se oculta: llega marcada
         assertFalse(franjas[1].disponible)
         assertEquals(10, franjas[1].descuento)
+    }
+
+    @Test
+    fun `del meta llega si el pedido cabe hoy y cuanto cabe`() = runBlocking {
+        servidor.enqueue(MockResponse().setBody(FRANJAS_NO_CABE))
+
+        val delDia = repositorio.franjas(idTienda = 3, minutos = 100).getOrThrow()
+
+        assertFalse(delDia.cabeHoy)
+        assertEquals(72, delDia.minutosMaximosHoy)
+    }
+
+    // Un backend sin cabe_hoy ni minutos_maximos_hoy no debe mostrar el aviso
+    @Test
+    fun `sin esos campos en el meta se toma que si cabe`() = runBlocking {
+        servidor.enqueue(MockResponse().setBody(FRANJAS))
+
+        val delDia = repositorio.franjas(idTienda = 3, minutos = 18).getOrThrow()
+
+        assertTrue(delDia.cabeHoy)
+        assertNull(delDia.minutosMaximosHoy)
     }
 
     @Test
@@ -121,6 +142,12 @@ class PedidoRepositoryTest {
               {"fecha":"2026-10-26","inicio":"11:00","fin":"11:10","minutos_restantes":24,"disponible":true,"descuento":null},
               {"fecha":"2026-10-26","inicio":"11:10","fin":"11:20","minutos_restantes":4,"disponible":false,"descuento":10}
             ],"meta":{"total":2}}
+        """
+
+        const val FRANJAS_NO_CABE = """
+            {"datos":[
+              {"fecha":"2026-10-26","inicio":"11:00","fin":"11:10","minutos_restantes":0,"disponible":false,"descuento":null}
+            ],"meta":{"total":1,"cabe_hoy":false,"minutos_maximos_hoy":72}}
         """
 
         const val ESPERA = """

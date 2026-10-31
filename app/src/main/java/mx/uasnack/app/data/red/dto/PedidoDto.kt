@@ -21,6 +21,22 @@ data class FranjaDto(
     val descuento: Int? = null
 )
 
+// Respuesta completa de GET /tiendas/{id}/franjas: la lista y su "meta" (#53 del backend).
+@Serializable
+data class FranjasDto(
+    val datos: List<FranjaDto>,
+    val meta: FranjasMetaDto = FranjasMetaDto()
+)
+
+// Con valores por defecto: si el backend no los manda, la pantalla se comporta como antes (sin aviso)
+@Serializable
+data class FranjasMetaDto(
+    // false = el pedido no cabe en ninguna hora de hoy
+    @SerialName("cabe_hoy") val cabeHoy: Boolean = true,
+    // El pedido más grande que todavía cabe hoy, en minutos de cocina. 0 = ya no hay horas hoy.
+    @SerialName("minutos_maximos_hoy") val minutosMaximosHoy: Int? = null
+)
+
 // GET /tiendas/{id}/espera (#57 del backend). Siempre un rango, nunca un tiempo fijo.
 @Serializable
 data class EstimadoDto(

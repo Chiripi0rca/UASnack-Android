@@ -34,6 +34,10 @@ data class EstadoEleccionRetiroUi(
     val minutos: Int = 0,
     val franjas: List<Franja> = emptyList(),
     val franjaElegida: Franja? = null,
+    // false = el pedido no cabe en ninguna hora de hoy (aviso de pedido grande)
+    val cabeHoy: Boolean = true,
+    // El pedido más grande que todavía cabe hoy, en minutos de cocina. 0 = ya no hay horas hoy.
+    val minutosMaximosHoy: Int? = null,
     val espera: Estimado? = null,
     // Mensaje del servidor si falló algo (por ejemplo, sin conexión)
     val error: String? = null
@@ -80,11 +84,16 @@ class EleccionRetiroViewModel(
             val espera = async { pedidoRepository.espera(idTienda, minutos) }
 
             franjas.await()
-                .onSuccess { lista ->
+                .onSuccess { delDia ->
                     _estado.update { estado ->
                         // Si la franja elegida ya no está o se llenó, se quita la selección
-                        val sigue = lista.firstOrNull { it.inicio == estado.franjaElegida?.inicio && it.disponible }
-                        estado.copy(franjas = lista, franjaElegida = sigue)
+                        val sigue = delDia.franjas.firstOrNull { it.inicio == estado.franjaElegida?.inicio && it.disponible }
+                        estado.copy(
+                            franjas = delDia.franjas,
+                            franjaElegida = sigue,
+                            cabeHoy = delDia.cabeHoy,
+                            minutosMaximosHoy = delDia.minutosMaximosHoy
+                        )
                     }
                 }
                 .onFailure { e -> _estado.update { it.copy(error = e.aErrorApi().mensaje) } }
