@@ -18,6 +18,7 @@ import mx.uasnack.app.data.repositorio.CarritoRepository
 import mx.uasnack.app.data.repositorio.CatalogoRepository
 import mx.uasnack.app.data.repositorio.PedidoRepository
 import mx.uasnack.app.data.repositorio.SesionRepository
+import mx.uasnack.app.data.repositorio.PerfilRepository
 
 // Se crea una sola vez al abrir la app, antes que cualquier pantalla (está registrada en
 // AndroidManifest.xml con android:name=".UasnackApp"). Arma las piezas que se comparten entre
@@ -49,6 +50,10 @@ class UasnackApp : Application() {
 
     // Lo que usarán los ViewModels de acceso, registro y verificación
     val sesionRepository: SesionRepository by lazy { SesionRepository(api, sesionAlmacen) }
+
+    val perfilRepository: PerfilRepository by lazy {
+        PerfilRepository(api)
+    }
 
     // Base de datos local (Room): hoy solo la caché del catálogo
     val baseDatos: UasnackBaseDatos by lazy { UasnackBaseDatos.crear(this) }
