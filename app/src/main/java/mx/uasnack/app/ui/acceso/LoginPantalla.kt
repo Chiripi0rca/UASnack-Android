@@ -46,6 +46,7 @@ fun LoginPantalla(
     alIniciarSesion: () -> Unit,
     alIrARegistro: () -> Unit,
     alIrAVerificacion: (correo: String) -> Unit,
+    alOlvidarPassword: () -> Unit,
     viewModel: LoginViewModel = viewModel(factory = LoginViewModel.Fabrica)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -66,7 +67,8 @@ fun LoginPantalla(
         alCambiarPassword = viewModel::cambiarPassword,
         alAlternarVerPassword = viewModel::alternarVerPassword,
         alEntrar = viewModel::entrar,
-        alIrARegistro = alIrARegistro
+        alIrARegistro = alIrARegistro,
+        alOlvidarPassword = alOlvidarPassword
     )
 }
 
@@ -77,7 +79,8 @@ private fun LoginContenido(
     alCambiarPassword: (String) -> Unit,
     alAlternarVerPassword: () -> Unit,
     alEntrar: () -> Unit,
-    alIrARegistro: () -> Unit
+    alIrARegistro: () -> Unit,
+    alOlvidarPassword: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -154,7 +157,20 @@ private fun LoginContenido(
             textoCargando = "Entrando..."
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            TextButton(
+                onClick = alOlvidarPassword
+            ) {
+                Text("¿Olvidaste tu contraseña?")
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -184,7 +200,9 @@ private fun LoginContenidoPreview() {
             alCambiarPassword = {},
             alAlternarVerPassword = {},
             alEntrar = {},
-            alIrARegistro = {}
+            alIrARegistro = {},
+            alOlvidarPassword = {}
         )
+
     }
 }

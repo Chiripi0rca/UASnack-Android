@@ -48,7 +48,10 @@ object ModuloRed {
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .build()
-
+        android.util.Log.d(
+            "UASnackRed",
+            "URL base utilizada: ${BuildConfig.API_BASE_URL}"
+        )
         return Retrofit.Builder()
             .baseUrl(urlBase)
             .client(cliente)

@@ -62,8 +62,23 @@ class SesionRepository(
 
     // GET /facultades. Las que se muestran en el registro, ya como modelo de dominio.
     suspend fun facultades(): Result<List<Facultad>> = try {
-        Result.success(api.obtenerFacultades().datos.map { it.aDominio() })
-    } catch (e: ErrorApi) {
+        val respuesta = api.obtenerFacultades()
+        val lista = respuesta.datos.map { it.aDominio() }
+
+        android.util.Log.d(
+            "UASnackFacultades",
+            "Facultades recibidas: ${lista.size} - $lista"
+        )
+
+        Result.success(lista)
+
+    } catch (e: Exception) {
+        android.util.Log.e(
+            "UASnackFacultades",
+            "Error al cargar facultades",
+            e
+        )
+
         Result.failure(e)
     }
 

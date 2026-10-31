@@ -21,6 +21,8 @@ import mx.uasnack.app.ui.pedido.CarritoPantalla
 import mx.uasnack.app.ui.pedido.EleccionRetiroPantalla
 import mx.uasnack.app.ui.tiendas.TiendasPantalla
 import mx.uasnack.app.ui.perfil.PerfilPantalla
+import mx.uasnack.app.ui.acceso.OlvidePasswordPantalla
+import mx.uasnack.app.ui.acceso.NuevaPasswordPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
 // sesionRepository: se usa para saber, al abrir la app, si ya hay una sesión guardada (#161).
@@ -51,9 +53,18 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
 
             composable(Rutas.LOGIN) {
                 LoginPantalla(
-                    alIniciarSesion = { navController.entrarAlPrincipal() },
-                    alIrARegistro = { navController.navigate(Rutas.REGISTRO) },
-                    alIrAVerificacion = { correo -> navController.navigate(Rutas.verificacion(correo)) }
+                    alIniciarSesion = {
+                        navController.entrarAlPrincipal()
+                    },
+                    alIrARegistro = {
+                        navController.navigate(Rutas.REGISTRO)
+                    },
+                    alIrAVerificacion = { correo ->
+                        navController.navigate(Rutas.verificacion(correo))
+                    },
+                    alOlvidarPassword = {
+                        navController.navigate(Rutas.OLVIDE_PASSWORD)
+                    }
                 )
             }
 
@@ -77,6 +88,53 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
                 )
             ) {
                 VerificacionPantalla(alVerificar = { navController.entrarAlPrincipal() })
+            }
+            // Recuperación de contraseña: solicitar código por correo.
+            composable(Rutas.OLVIDE_PASSWORD) {
+
+                OlvidePasswordPantalla(
+
+                    alVolverLogin = {
+                        navController.popBackStack()
+                    },
+
+                    alIrANuevaPassword = { correo ->
+
+                        navController.navigate(
+                            Rutas.nuevaPassword(correo)
+                        )
+                    }
+                )
+            }
+
+            // Recuperación de contraseña: introducir código y contraseña nueva.
+            composable(
+                route = Rutas.NUEVA_PASSWORD,
+                arguments = listOf(
+                    navArgument(Rutas.ARG_CORREO) {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
+
+                NuevaPasswordPantalla(
+
+                    alVolverARecuperacion = {
+                        navController.popBackStack()
+                    },
+
+                    alIrALogin = {
+
+                        navController.navigate(Rutas.LOGIN) {
+
+                            popUpTo(Rutas.LOGIN) {
+                                inclusive = false
+                            }
+
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
         }
 
