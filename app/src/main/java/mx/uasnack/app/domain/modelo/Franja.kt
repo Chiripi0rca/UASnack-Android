@@ -17,6 +17,15 @@ data class Franja(
     val descuento: Int?
 )
 
+// Lo que regresa PedidoRepository.franjas(): las franjas y si el pedido cabe hoy
+data class FranjasDelDia(
+    val franjas: List<Franja>,
+    // false = no cabe en ninguna hora de hoy: se avisa "Tu pedido es muy grande para hoy"
+    val cabeHoy: Boolean,
+    // El pedido más grande que todavía cabe hoy, en minutos de cocina. 0 = ya no hay horas hoy.
+    val minutosMaximosHoy: Int?
+)
+
 // Tiempo estimado del modo "voy saliendo". Siempre un rango: nunca se muestra un tiempo fijo.
 data class Estimado(
     val min: Int,

@@ -4,7 +4,7 @@ import mx.uasnack.app.data.red.dto.CambiarPasswordRequest
 import mx.uasnack.app.data.red.dto.CodigoEnviadoDto
 import mx.uasnack.app.data.red.dto.EstimadoDto
 import mx.uasnack.app.data.red.dto.FacultadDto
-import mx.uasnack.app.data.red.dto.FranjaDto
+import mx.uasnack.app.data.red.dto.FranjasDto
 import mx.uasnack.app.data.red.dto.ListaDto
 import mx.uasnack.app.data.red.dto.LoginRequest
 import mx.uasnack.app.data.red.dto.ObjetoDto
@@ -76,7 +76,7 @@ interface ApiService {
         @Path("idTienda") idTienda: Int,
         @Query("minutos") minutos: Int,
         @Query("limite") limite: Int = 8
-    ): ListaDto<FranjaDto>
+    ): FranjasDto
 
     // Tiempo de espera del modo "voy saliendo" (#57 del backend). La usa PedidoRepository.espera() (#175).
     @GET("tiendas/{idTienda}/espera")
