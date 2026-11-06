@@ -48,3 +48,69 @@ data class EstimadoDto(
     // false = la tienda ya no acepta más pedidos "voy saliendo" por ahora
     @SerialName("voy_saliendo_disponible") val voySaliendoDisponible: Boolean
 )
+
+// --- ESQUELETO (Sprint 04). La forma del JSON está en el documento de turnos del Sprint 04. ---
+
+// Cuerpo de POST /pedidos (#148 del backend). El header Idempotency-Key lo pone #183.
+@Serializable
+data class CrearPedidoRequest(
+    @SerialName("id_tienda") val idTienda: Int,
+    // "franja" o "voy_saliendo"
+    @SerialName("modo_retiro") val modoRetiro: String,
+    // "2026-11-09 11:30"; null en "voy saliendo"
+    val franja: String? = null,
+    val lineas: List<LineaPedidoRequest>
+)
+
+@Serializable
+data class LineaPedidoRequest(
+    @SerialName("id_producto") val idProducto: Int,
+    val cantidad: Int,
+    val extras: List<Int> = emptyList(),
+    val quitables: List<Int> = emptyList()
+)
+
+// Respuesta de POST /pedidos: 201, o 200 si la clave se repite
+@Serializable
+data class PedidoCreadoDto(
+    @SerialName("codigo_pedido") val codigoPedido: String,
+    val estado: String,
+    // Llega como texto para no perder centavos: "85.00"
+    val total: String,
+    @SerialName("franja_inicio") val franjaInicio: String? = null,
+    @SerialName("franja_fin") val franjaFin: String? = null,
+    val pago: DatosPagoDto
+)
+
+// Lo que necesita PaymentSheet para confirmar el cobro en la cuenta de la tienda
+@Serializable
+data class DatosPagoDto(
+    @SerialName("client_secret") val clientSecret: String,
+    @SerialName("stripe_account") val stripeAccount: String
+)
+
+// Un renglón de GET /pagos (#69 del backend)
+@Serializable
+data class PagoDto(
+    val id: Int,
+    @SerialName("codigo_pedido") val codigoPedido: String,
+    val monto: String,
+    // "pendiente", "pagado", "reembolsado" o "fallido"
+    val estado: String,
+    @SerialName("creado_en") val creadoEn: String
+)
+
+// Una tarjeta de GET /pagos/metodos (#188 del backend)
+@Serializable
+data class MetodoPagoDto(
+    val id: String,
+    val marca: String,
+    val ultimos4: String,
+    val vence: String
+)
+
+// Respuesta de POST /pagos/metodos (#65 del backend). Con esto PaymentSheet guarda la tarjeta.
+@Serializable
+data class SetupIntentDto(
+    @SerialName("client_secret") val clientSecret: String
+)

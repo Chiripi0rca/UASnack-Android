@@ -62,4 +62,24 @@ object Rutas {
     // HU-33 (Josef). Con sesión, desde el botón de Perfil (#220). Empieza con "perfil/" para que
     // la barra siga marcando la pestaña Perfil.
     const val CAMBIAR_PASSWORD = "perfil/cambiar-password"
+
+    // --- Sprint 04 (esqueleto) ---
+
+    // Confirmación y pago (#195). Recibe de Elección de retiro la tienda, el modo y la franja.
+    const val ARG_MODO_RETIRO = "modoRetiro"
+    const val ARG_FRANJA = "franja"
+    const val CONFIRMACION = "confirmacion/{$ARG_ID_TIENDA}?$ARG_MODO_RETIRO={$ARG_MODO_RETIRO}&$ARG_FRANJA={$ARG_FRANJA}"
+    fun confirmacion(idTienda: Int, modoRetiro: String, franja: String?) =
+        "confirmacion/$idTienda?$ARG_MODO_RETIRO=$modoRetiro&$ARG_FRANJA=${Uri.encode(franja.orEmpty())}"
+
+    // Pedido confirmado (#196). Recibe el folio y la hora en la ruta: la consulta del pedido
+    // (GET /pedidos/{codigo}) llega hasta el Sprint 5.
+    const val ARG_CODIGO_PEDIDO = "codigoPedido"
+    const val ARG_HORA = "hora"
+    const val PEDIDO_CONFIRMADO = "pedido-confirmado/{$ARG_CODIGO_PEDIDO}?$ARG_HORA={$ARG_HORA}"
+    fun pedidoConfirmado(codigoPedido: String, hora: String?) =
+        "pedido-confirmado/${Uri.encode(codigoPedido)}?$ARG_HORA=${Uri.encode(hora.orEmpty())}"
+
+    // Métodos de pago (#191). Empieza con "pagos/" para que la barra siga marcando la pestaña Pagos.
+    const val METODOS_PAGO = "pagos/metodos"
 }

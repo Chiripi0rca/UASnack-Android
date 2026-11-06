@@ -2,10 +2,12 @@ package mx.uasnack.app.data.repositorio
 
 import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.ErrorApi
+import mx.uasnack.app.data.red.dto.CrearPedidoRequest
 import mx.uasnack.app.data.red.dto.FranjaDto
 import mx.uasnack.app.domain.modelo.Estimado
 import mx.uasnack.app.domain.modelo.Franja
 import mx.uasnack.app.domain.modelo.FranjasDelDia
+import mx.uasnack.app.domain.modelo.PedidoCreado
 
 // Única puerta de la app para lo que pasa al pedir (Sprint 03).
 // Cada función la completa su tarea:
@@ -47,6 +49,12 @@ class PedidoRepository(
         }
     }
 
+    // ESQUELETO (Sprint 04). #195 (Josef) llama a api.crearPedido; #184 (Daniel) agrega la bandeja de
+    // salida si no hay señal. Por ahora regresa DATOS DE EJEMPLO. Se cambia SOLO el contenido.
+    @Suppress("UNUSED_PARAMETER")
+    suspend fun crear(pedido: CrearPedidoRequest): Result<PedidoCreado> =
+        Result.success(PEDIDO_DE_EJEMPLO)
+
     // Convierte el resultado en Result: los ErrorApi (sin red, 401, 404, 422...) regresan como failure
     // con su código y mensaje del servidor.
     private suspend fun <T> intentar(bloque: suspend () -> T): Result<T> = try {
@@ -55,7 +63,17 @@ class PedidoRepository(
         Result.failure(e)
     }
 
-
+    private companion object {
+        val PEDIDO_DE_EJEMPLO = PedidoCreado(
+            codigoPedido = "TA-2451",
+            estado = "PENDIENTE_PAGO",
+            total = "85.00",
+            franjaInicio = "11:30",
+            franjaFin = "11:40",
+            clientSecret = "pi_ejemplo_secret_ejemplo",
+            stripeAccount = "acct_ejemplo"
+        )
+    }
 }
 
 private fun FranjaDto.aDominio() = Franja(
