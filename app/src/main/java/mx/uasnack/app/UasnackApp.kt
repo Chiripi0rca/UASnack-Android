@@ -16,6 +16,7 @@ import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.ModuloRed
 import mx.uasnack.app.data.repositorio.CarritoRepository
 import mx.uasnack.app.data.repositorio.CatalogoRepository
+import mx.uasnack.app.data.repositorio.PagoRepository
 import mx.uasnack.app.data.repositorio.PedidoRepository
 import mx.uasnack.app.data.repositorio.SesionRepository
 import mx.uasnack.app.data.repositorio.PerfilRepository
@@ -69,6 +70,9 @@ class UasnackApp : Application() {
 
     // Lo que usarán Elección de retiro (#55) y el panel "Voy saliendo" (#60). Siempre va a la red.
     val pedidoRepository: PedidoRepository by lazy { PedidoRepository(api) }
+
+    // Lo que usarán Historial de pagos (#72) y Métodos de pago (#191)
+    val pagoRepository: PagoRepository by lazy { PagoRepository(api) }
 }
 
 // Para las fábricas de los ViewModels (viewModelFactory { initializer { ... } }):

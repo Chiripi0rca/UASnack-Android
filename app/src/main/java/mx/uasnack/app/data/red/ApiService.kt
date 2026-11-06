@@ -2,22 +2,28 @@ package mx.uasnack.app.data.red
 
 import mx.uasnack.app.data.red.dto.CambiarPasswordRequest
 import mx.uasnack.app.data.red.dto.CodigoEnviadoDto
+import mx.uasnack.app.data.red.dto.CrearPedidoRequest
 import mx.uasnack.app.data.red.dto.EstimadoDto
 import mx.uasnack.app.data.red.dto.FacultadDto
 import mx.uasnack.app.data.red.dto.FranjasDto
 import mx.uasnack.app.data.red.dto.ListaDto
 import mx.uasnack.app.data.red.dto.LoginRequest
+import mx.uasnack.app.data.red.dto.MetodoPagoDto
 import mx.uasnack.app.data.red.dto.ObjetoDto
 import mx.uasnack.app.data.red.dto.OlvidePasswordRequest
+import mx.uasnack.app.data.red.dto.PagoDto
+import mx.uasnack.app.data.red.dto.PedidoCreadoDto
 import mx.uasnack.app.data.red.dto.PerfilRespuestaDto
 import mx.uasnack.app.data.red.dto.ProductoDto
 import mx.uasnack.app.data.red.dto.ReenviarCodigoRequest
 import mx.uasnack.app.data.red.dto.RegistroRequest
 import mx.uasnack.app.data.red.dto.RestablecerPasswordRequest
 import mx.uasnack.app.data.red.dto.SesionDto
+import mx.uasnack.app.data.red.dto.SetupIntentDto
 import mx.uasnack.app.data.red.dto.TiendaDto
 import mx.uasnack.app.data.red.dto.VerificarRequest
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -99,4 +105,26 @@ interface ApiService {
     // Necesita el token (lo agrega AuthInterceptor)
     @POST("auth/cambiar-password")
     suspend fun cambiarPassword(@Body body: CambiarPasswordRequest)
+
+    // --- Sprint 04 (esqueleto). La forma del JSON está en el documento de turnos del Sprint 04. ---
+
+    // Crea el pedido (#148 del backend). El header Idempotency-Key lo agrega el interceptor de #183.
+    @POST("pedidos")
+    suspend fun crearPedido(@Body body: CrearPedidoRequest): ObjetoDto<PedidoCreadoDto>
+
+    // Pagos y reembolsos del alumno (#69 del backend). Lo usa PagoRepository (#186).
+    @GET("pagos")
+    suspend fun obtenerPagos(@Query("pagina") pagina: Int = 1): ListaDto<PagoDto>
+
+    // Tarjetas guardadas (#188 del backend)
+    @GET("pagos/metodos")
+    suspend fun obtenerMetodosPago(): ListaDto<MetodoPagoDto>
+
+    // Empieza a guardar una tarjeta (#65 del backend): regresa el client_secret para PaymentSheet
+    @POST("pagos/metodos")
+    suspend fun agregarMetodoPago(): ObjetoDto<SetupIntentDto>
+
+    // 204 sin contenido (#65 del backend)
+    @DELETE("pagos/metodos/{id}")
+    suspend fun eliminarMetodoPago(@Path("id") id: String)
 }
