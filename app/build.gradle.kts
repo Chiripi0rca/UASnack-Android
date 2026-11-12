@@ -1,9 +1,23 @@
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
+val localProperties = Properties()
+
+val localPropertiesFile = rootProject.file("local.properties")
+
+if (localPropertiesFile.isFile) {
+    localPropertiesFile.inputStream().use { inputStream ->
+        localProperties.load(inputStream)
+    }
+}
+
+val stripePublishableKey = localProperties
+    .getProperty("STRIPE_PUBLISHABLE_KEY", "")
+    .trim()
 
 android {
     namespace = "mx.uasnack.app"
@@ -19,6 +33,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "STRIPE_PUBLISHABLE_KEY",
+            "\"$stripePublishableKey\""
+        )
     }
 
     buildFeatures {
@@ -64,7 +84,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Compose (el BOM fija las versiones de todo lo que dice "compose")
-    implementation(platform(libs.androidx.compose.bom))
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -92,7 +113,7 @@ dependencies {
     testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
     // Solo en debug: vista previa de @Preview y pruebas de UI
