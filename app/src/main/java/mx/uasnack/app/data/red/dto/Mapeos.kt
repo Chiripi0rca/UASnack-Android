@@ -1,6 +1,7 @@
 package mx.uasnack.app.data.red.dto
 
 import mx.uasnack.app.domain.modelo.Facultad
+import mx.uasnack.app.domain.modelo.Pago
 import mx.uasnack.app.domain.modelo.Rol
 import mx.uasnack.app.domain.modelo.Usuario
 
@@ -22,5 +23,11 @@ fun UsuarioDto.aDominio() = Usuario(
     reputacion = reputacion,
     correoVerificado = correoVerificadoEn != null
 )
-
 fun FacultadDto.aDominio() = Facultad(id = id, nombre = nombre)
+fun PagoDto.aDominio() = Pago(
+    id = id,
+    codigoPedido = codigoPedido,
+    monto = monto,
+    estado = estado,
+    creadoEn = creadoEn
+)

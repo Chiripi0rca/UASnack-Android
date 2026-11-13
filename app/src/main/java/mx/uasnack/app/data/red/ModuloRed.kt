@@ -1,4 +1,5 @@
 package mx.uasnack.app.data.red
+import mx.uasnack.app.data.red.interceptores.IdempotencyInterceptor
 
 import kotlinx.serialization.json.Json
 import mx.uasnack.app.BuildConfig
@@ -33,18 +34,19 @@ object ModuloRed {
         urlBase: String = BuildConfig.API_BASE_URL
     ): ApiService {
         val cliente = OkHttpClient.Builder()
-            // El orden importa. OkHttp los ejecuta del primero al último al salir la petición:
-            // 1. ErrorInterceptor: el más externo, convierte en ErrorApi todo lo que falle adentro.
+            // El orden importa. OkHttp los ejecuta del primero al último al salir la petición
+            // 1. ErrorInterceptor: el más externo, convierte en ErrorApi todo lo que falle
             // 2. AuthInterceptor: pone el token.
-            // 3. SesionInterceptor: ve la petición ya con token, para distinguir un 401 de sesión vencida.
+            // 3. SesionInterceptor: ve la petición ya con token, para distinguir un 401 de
             .addInterceptor(ErrorInterceptor(json))
-            // Pide JSON siempre, igual que la PWA: así Laravel nunca responde con una página HTML
+            // Pide JSON siempre, igual que la PWA: así Laravel nunca responde con una página
             .addInterceptor { chain ->
                 chain.proceed(chain.request().newBuilder().header("Accept", "application/json").build())
             }
             .addInterceptor(AuthInterceptor(tokenActual))
             .addInterceptor(SesionInterceptor(alVencerSesion))
-            // En la red de la universidad las conexiones pueden ser lentas: 20 s antes de rendirse
+            .addInterceptor(IdempotencyInterceptor()) // <-- AGRÉGALO AQUÍ
+            // En la red de la universidad las conexiones pueden ser lentas: 20 s antes de
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .build()
