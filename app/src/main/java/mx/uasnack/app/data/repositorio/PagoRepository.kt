@@ -1,6 +1,7 @@
 package mx.uasnack.app.data.repositorio
 
 import mx.uasnack.app.data.red.ApiService
+import mx.uasnack.app.data.red.dto.aDominio
 import mx.uasnack.app.domain.modelo.MetodoPago
 import mx.uasnack.app.domain.modelo.Pago
 
@@ -16,7 +17,11 @@ class PagoRepository(
 ) {
 
     // GET /pagos
-    suspend fun pagos(pagina: Int = 1): Result<List<Pago>> = Result.success(PAGOS_DE_EJEMPLO)
+    suspend fun pagos(pagina: Int = 1): Result<List<Pago>> = runCatching {
+        api.obtenerPagos(pagina = pagina).datos.map { it.aDominio() }
+    }
+
+
 
     // GET /pagos/metodos
     suspend fun metodos(): Result<List<MetodoPago>> = Result.success(METODOS_DE_EJEMPLO)

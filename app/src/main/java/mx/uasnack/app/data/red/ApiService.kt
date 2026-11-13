@@ -22,12 +22,18 @@ import mx.uasnack.app.data.red.dto.SesionDto
 import mx.uasnack.app.data.red.dto.SetupIntentDto
 import mx.uasnack.app.data.red.dto.TiendaDto
 import mx.uasnack.app.data.red.dto.VerificarRequest
+import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.PATCH
+import retrofit2.http.DELETE
 import retrofit2.http.Path
 import retrofit2.http.Query
+
+
 
 // Endpoints de la API (/api/v1). Las rutas no llevan "/" al inicio porque se pegan a API_BASE_URL,
 // que ya termina en "/api/v1/".
@@ -110,7 +116,10 @@ interface ApiService {
 
     // Crea el pedido (#148 del backend). El header Idempotency-Key lo agrega el interceptor de #183.
     @POST("pedidos")
-    suspend fun crearPedido(@Body body: CrearPedidoRequest): ObjetoDto<PedidoCreadoDto>
+    suspend fun crearPedido(
+        @Body body: CrearPedidoRequest,
+        @Header("Idempotency-Key") idempotencyKey: String? = null
+    ): ObjetoDto<PedidoCreadoDto>
 
     // Pagos y reembolsos del alumno (#69 del backend). Lo usa PagoRepository (#186).
     @GET("pagos")
