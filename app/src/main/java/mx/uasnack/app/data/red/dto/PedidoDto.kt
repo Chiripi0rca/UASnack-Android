@@ -66,8 +66,8 @@ data class CrearPedidoRequest(
 data class LineaPedidoRequest(
     @SerialName("id_producto") val idProducto: Int,
     val cantidad: Int,
-    val extras: List<Int> = emptyList(),
-    val quitables: List<Int> = emptyList()
+    val extras: List<String> = emptyList(),
+    val quitables: List<String> = emptyList()
 )
 
 // Respuesta de POST /pedidos: 201, o 200 si la clave se repite

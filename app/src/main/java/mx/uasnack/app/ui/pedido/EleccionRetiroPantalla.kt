@@ -43,6 +43,7 @@ import mx.uasnack.app.ui.componentes.PanelVoySaliendo
 @Composable
 fun EleccionRetiroPantalla(
     alVolver: () -> Unit,
+    alContinuar: (String, String?) -> Unit,
     viewModel: EleccionRetiroViewModel = viewModel(factory = EleccionRetiroViewModel.Fabrica)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -95,7 +96,35 @@ fun EleccionRetiroPantalla(
 
             // "Continuar" lleva a Confirmación y pago (pantalla 9), que aún no existe: deshabilitado,
             // igual que hacía el Carrito antes de esta pantalla.
-            BotonPrincipal(texto = "Continuar", alPulsar = {}, habilitado = false)
+            val puedeContinuar = when (estado.modo) {
+                ModoRetiro.FRANJA ->
+                    estado.franjaElegida?.disponible == true
+
+                ModoRetiro.VOY_SALIENDO ->
+                    estado.espera?.voySaliendoDisponible == true
+            }
+
+            BotonPrincipal(
+                texto = "Continuar",
+                alPulsar = {
+                    when (estado.modo) {
+
+                        ModoRetiro.FRANJA -> {
+                            estado.franjaElegida?.let { franja ->
+                                alContinuar(
+                                    "franja",
+                                    "${franja.fecha} ${franja.inicio}"
+                                )
+                            }
+                        }
+
+                        ModoRetiro.VOY_SALIENDO -> {
+                            alContinuar("voy_saliendo", null)
+                        }
+                    }
+                },
+                habilitado = puedeContinuar
+            )
         }
     }
 }

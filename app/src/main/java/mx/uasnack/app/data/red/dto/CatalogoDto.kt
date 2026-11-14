@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.jsonPrimitive
 
 // DTOs del catálogo (#228): la forma del JSON de GET /tiendas, /tiendas/{id}/productos y /productos/{id}.
-// Esos endpoints los hace la #46 del backend. Si allá cambia un nombre, se ajusta aquí y en Mapeos.kt;
+// Esos endpoints los hace la #46 del backend. Si allá cambia un nombre, se ajusta aquí y en        Mapeos.kt;
 // las pantallas no se enteran.
 
 // TiendaResource del backend
