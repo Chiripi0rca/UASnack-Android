@@ -24,6 +24,7 @@ import mx.uasnack.app.ui.perfil.PerfilPantalla
 import mx.uasnack.app.ui.acceso.OlvidePasswordPantalla
 import mx.uasnack.app.ui.acceso.NuevaPasswordPantalla
 import mx.uasnack.app.ui.perfil.CambiarPasswordPantalla
+import mx.uasnack.app.ui.pedido.ConfirmacionPagoPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
 // sesionRepository: se usa para saber, al abrir la app, si ya hay una sesión guardada (#161).
@@ -199,10 +200,95 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             // Elección de retiro (#55)
             composable(
                 route = Rutas.RETIRO,
-                arguments = listOf(navArgument(Rutas.ARG_ID_TIENDA) { type = NavType.IntType })
+                arguments = listOf(
+                    navArgument(Rutas.ARG_ID_TIENDA) {
+                        type = NavType.IntType
+                    }
+                )
+            ) { entrada ->
+
+                val idTienda = checkNotNull(
+                    entrada.arguments?.getInt(Rutas.ARG_ID_TIENDA)
+                )
+
+                ConBarraInferior(navController) {
+                    EleccionRetiroPantalla(
+                        alVolver = {
+                            navController.popBackStack()
+                        },
+                        alContinuar = { modoRetiro, franja ->
+
+                            navController.navigate(
+                                Rutas.confirmacion(
+                                    idTienda = idTienda,
+                                    modoRetiro = modoRetiro,
+                                    franja = franja
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+
+            // Confirmación y pago (#195).
+            composable(
+                route = Rutas.CONFIRMACION,
+                arguments = listOf(
+                    navArgument(Rutas.ARG_ID_TIENDA) {
+                        type = NavType.IntType
+                    },
+                    navArgument(Rutas.ARG_MODO_RETIRO) {
+                        type = NavType.StringType
+                    },
+                    navArgument(Rutas.ARG_FRANJA) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) {
+
+                ConBarraInferior(navController) {
+
+                    ConfirmacionPagoPantalla(
+                        alVolver = {
+                            navController.popBackStack()
+                        },
+                        alPedidoConfirmado = { codigoPedido, hora ->
+
+                            navController.navigate(
+                                Rutas.pedidoConfirmado(
+                                    codigoPedido = codigoPedido,
+                                    hora = hora
+                                )
+                            ) {
+                                // El pedido ya fue creado; no regresar al carrito
+                                // como si todavía no existiera.
+                                popUpTo(Rutas.CARRITO) {
+                                    inclusive = true
+                                }
+
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
+
+            // Destino provisional: la pantalla definitiva pertenece a #196.
+            composable(
+                route = Rutas.PEDIDO_CONFIRMADO,
+                arguments = listOf(
+                    navArgument(Rutas.ARG_CODIGO_PEDIDO) {
+                        type = NavType.StringType
+                    },
+                    navArgument(Rutas.ARG_HORA) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
+                )
             ) {
                 ConBarraInferior(navController) {
-                    EleccionRetiroPantalla(alVolver = { navController.popBackStack() })
+                    PantallaPendiente("Pedido confirmado (#196)")
                 }
             }
 
