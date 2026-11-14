@@ -108,6 +108,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // Pagos con Stripe (PaymentSheet)
+    implementation(libs.stripe.android)
+
     // Pruebas
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)
