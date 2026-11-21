@@ -40,10 +40,21 @@ fun BarraInferior(navController: NavController) {
             NavigationBarItem(
                 selected = destino.ruta == destinoActivo,
                 onClick = {
-                    navController.navigate(destino.ruta) {
-                        // Patrón oficial de barra inferior: no apila pantallas al cambiar de pestaña,
-                        // guarda el estado de cada pestaña y no duplica la misma pantalla.
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+
+                    // Mientras se integra el historial (#72), la pestaña Pagos
+                    // abre directamente Métodos de pago (#191).
+                    val rutaDestino = if (destino.ruta == Rutas.PAGOS) {
+                        Rutas.METODOS_PAGO
+                    } else {
+                        destino.ruta
+                    }
+
+                    navController.navigate(rutaDestino) {
+
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+
                         launchSingleTop = true
                         restoreState = true
                     }

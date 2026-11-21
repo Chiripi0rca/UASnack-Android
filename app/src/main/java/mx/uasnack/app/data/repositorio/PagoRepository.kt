@@ -1,5 +1,6 @@
 package mx.uasnack.app.data.repositorio
 
+import mx.uasnack.app.data.red.ErrorApi
 import mx.uasnack.app.data.red.ApiService
 import mx.uasnack.app.data.red.dto.aDominio
 import mx.uasnack.app.domain.modelo.MetodoPago
@@ -24,13 +25,33 @@ class PagoRepository(
 
 
     // GET /pagos/metodos
-    suspend fun metodos(): Result<List<MetodoPago>> = Result.success(METODOS_DE_EJEMPLO)
+    suspend fun metodos(): Result<List<MetodoPago>> = intentar {
+        api.obtenerMetodosPago()
+            .datos
+            .map { it.aDominio() }
+    }
 
-    // POST /pagos/metodos: regresa el client_secret para que PaymentSheet guarde la tarjeta
-    suspend fun agregarMetodo(): Result<String> = Result.success("seti_ejemplo_secret_ejemplo")
+    // POST /pagos/metodos
+    // Regresa el client_secret para presentar Stripe PaymentSheet.
+    suspend fun agregarMetodo(): Result<String> = intentar {
+        api.agregarMetodoPago()
+            .datos
+            .clientSecret
+    }
 
     // DELETE /pagos/metodos/{id}
-    suspend fun eliminarMetodo(id: String): Result<Unit> = Result.success(Unit)
+    suspend fun eliminarMetodo(id: String): Result<Unit> = intentar {
+        api.eliminarMetodoPago(id)
+    }
+
+    // Conserva los errores originales del servidor dentro de Result.failure.
+    private suspend fun <T> intentar(
+        bloque: suspend () -> T
+    ): Result<T> = try {
+        Result.success(bloque())
+    } catch (e: ErrorApi) {
+        Result.failure(e)
+    }
 
     private companion object {
         val PAGOS_DE_EJEMPLO = listOf(
@@ -41,9 +62,6 @@ class PagoRepository(
                 estado = "pagado",
                 creadoEn = "2026-11-09 11:21:00"
             )
-        )
-        val METODOS_DE_EJEMPLO = listOf(
-            MetodoPago(id = "pm_ejemplo", marca = "visa", ultimos4 = "4242", vence = "12/28")
         )
     }
 }

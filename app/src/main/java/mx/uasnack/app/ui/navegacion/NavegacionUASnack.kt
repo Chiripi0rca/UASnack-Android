@@ -25,6 +25,7 @@ import mx.uasnack.app.ui.acceso.OlvidePasswordPantalla
 import mx.uasnack.app.ui.acceso.NuevaPasswordPantalla
 import mx.uasnack.app.ui.perfil.CambiarPasswordPantalla
 import mx.uasnack.app.ui.pedido.ConfirmacionPagoPantalla
+import mx.uasnack.app.ui.pagos.MetodosPagoPantalla
 
 // Todas las pantallas de la app y cómo se pasa de una a otra.
 // sesionRepository: se usa para saber, al abrir la app, si ya hay una sesión guardada (#161).
@@ -295,6 +296,8 @@ fun NavegacionUASnack(sesionRepository: SesionRepository) {
             // Destinos de la barra que aún no tienen pantalla (#229)
             composable(Rutas.PEDIDOS) { ConBarraInferior(navController) { PantallaPendiente("Pedidos") } }
             composable(Rutas.PAGOS) { ConBarraInferior(navController) { PantallaPendiente("Pagos") } }
+            // Métodos de pago (#191).
+            composable(Rutas.METODOS_PAGO) { ConBarraInferior(navController) { MetodosPagoPantalla() } }
             composable(Rutas.PERFIL) {
                 ConBarraInferior(navController) {
                     PerfilPantalla(
